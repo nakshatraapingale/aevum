@@ -1,0 +1,44 @@
+# Private data - NEVER upload these
+.env
+.env.local
+*.env
+secrets.toml
+.streamlit/secrets.toml
+
+# User uploaded data
+data/uploads/
+*.pdf
+user_data/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
