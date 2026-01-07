@@ -367,3 +367,50 @@ def merge_blood_whoop_data(blood_df: pd.DataFrame, whoop_df: pd.DataFrame) -> pd
     merged[blood_cols] = merged[blood_cols].fillna(method='ffill')
     
     return merged
+
+
+def pdf_to_dataframe(pdf_file) -> pd.DataFrame:
+    """
+    Convert uploaded PDF file to DataFrame format expected by the app.
+    Handles file-like objects from Streamlit file_uploader.
+    """
+    import tempfile
+    import os
+    
+    if not PDF_AVAILABLE:
+        raise ImportError("pdfplumber not installed. Run: pip install pdfplumber")
+    
+    # Save uploaded file to temp location
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+        tmp.write(pdf_file.read())
+        tmp_path = tmp.name
+    
+    try:
+        # Extract biomarkers
+        result = extract_biomarkers_from_pdf(tmp_path)
+        
+        if "error" in result:
+            raise ValueError(f"PDF parsing error: {result['error']}")
+        
+        biomarkers = result.get("biomarkers", {})
+        test_date = result.get("test_date", datetime.now().strftime("%Y-%m-%d"))
+        
+        if not biomarkers:
+            raise ValueError("No biomarkers found in PDF. Try uploading a CSV instead.")
+        
+        # Convert to DataFrame format
+        rows = []
+        for name, data in biomarkers.items():
+            row = {"date": test_date, name: data["value"]}
+            rows.append(row)
+        
+        # Pivot to wide format (one row with all biomarkers as columns)
+        df = pd.DataFrame([{"date": test_date}])
+        for name, data in biomarkers.items():
+            df[name] = data["value"]
+        
+        return df
+        
+    finally:
+        # Clean up temp file
+        os.unlink(tmp_path)

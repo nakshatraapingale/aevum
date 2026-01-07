@@ -18,7 +18,7 @@ from modules.optimal_ranges import (LONGEVITY_OPTIMAL_RANGES, classify_value,
                                      get_optimal_range, normalize_biomarker_name)
 from modules.longevity_engine import (calculate_phenoage, calculate_organ_system_scores,
                                        estimate_dunedin_pace, get_phenoage_requirements)
-from modules.data_extraction import (create_sample_blood_data, create_sample_whoop_data,
+from modules.data_extraction import (create_sample_blood_data, create_sample_whoop_data, pdf_to_dataframe,
                                       merge_blood_whoop_data, parse_whoop_csv)
 from modules.correlation_analysis import (calculate_correlation_matrix, lagging_indicator_analysis,
                                            performance_ceiling_analysis, cross_correlation_heatmap_data)
@@ -263,15 +263,19 @@ def main():
         st.session_state.chronological_age = st.number_input("Chronological Age", 18, 100, st.session_state.chronological_age)
         
         st.subheader("📊 Data Upload")
-        blood_file = st.file_uploader("Upload Blood Results (CSV)", type=['csv'])
+        blood_file = st.file_uploader("Upload Blood Results (PDF or CSV)", type=['pdf', 'csv'])
         whoop_file = st.file_uploader("Upload WHOOP Export (CSV)", type=['csv'])
         
         if blood_file:
             try:
-                st.session_state.blood_data = pd.read_csv(blood_file)
-                st.success("Blood data loaded!")
+                if blood_file.name.lower().endswith('.pdf'):
+                    st.session_state.blood_data = pdf_to_dataframe(blood_file)
+                    st.success("✅ Blood data extracted from PDF!")
+                else:
+                    st.session_state.blood_data = pd.read_csv(blood_file)
+                    st.success("✅ Blood data loaded from CSV!")
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Error parsing file: {e}")
         
         if whoop_file:
             try:
