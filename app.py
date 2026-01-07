@@ -1,5 +1,5 @@
 """
-Digital Twin Dashboard - Longevity Medicine Platform
+Aevum - Longevity Medicine Platform
 Integrates blood biomarkers with WHOOP biometrics for comprehensive health analysis.
 """
 import streamlit as st
@@ -28,7 +28,7 @@ from modules.auth import (render_auth_page, is_authenticated, get_current_user,
 
 # Page config
 st.set_page_config(
-    page_title="Digital Twin - Longevity Dashboard",
+    page_title="Aevum - Longevity Dashboard",
     page_icon="🧬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -244,7 +244,7 @@ def main():
     # User is authenticated - show the dashboard
     user = get_current_user()
     
-    st.markdown('<p class="main-header">🧬 Digital Twin Dashboard</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">🧬 Aevum</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Longevity-Optimized Health Analytics | Blood Biomarkers + WHOOP Integration</p>', unsafe_allow_html=True)
     
     # Sidebar

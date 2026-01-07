@@ -13,25 +13,39 @@ try:
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
+    Client = None
 
 
 def get_supabase_client() -> Optional[Client]:
     """Initialize and return Supabase client."""
     if not SUPABASE_AVAILABLE:
-        st.error("Supabase library not installed. Run: pip install supabase")
         return None
     
     try:
-        url = st.secrets.get("SUPABASE_URL")
-        key = st.secrets.get("SUPABASE_KEY")
+        # Try multiple ways to get secrets (Streamlit Cloud compatibility)
+        url = None
+        key = None
+        
+        # Method 1: Direct access
+        try:
+            url = st.secrets["SUPABASE_URL"]
+            key = st.secrets["SUPABASE_KEY"]
+        except:
+            pass
+        
+        # Method 2: Get method
+        if not url or not key:
+            try:
+                url = st.secrets.get("SUPABASE_URL")
+                key = st.secrets.get("SUPABASE_KEY")
+            except:
+                pass
         
         if not url or not key:
-            st.error("Supabase credentials not configured. Check .streamlit/secrets.toml")
             return None
         
         return create_client(url, key)
     except Exception as e:
-        st.error(f"Failed to connect to Supabase: {str(e)}")
         return None
 
 
@@ -39,7 +53,7 @@ def signup_user(email: str, password: str) -> Dict:
     """Register a new user."""
     client = get_supabase_client()
     if not client:
-        return {"success": False, "error": "Database connection failed"}
+        return {"success": False, "error": "Database not configured. Use Demo Mode instead."}
     
     try:
         response = client.auth.sign_up({
@@ -68,7 +82,7 @@ def login_user(email: str, password: str) -> Dict:
     """Authenticate an existing user."""
     client = get_supabase_client()
     if not client:
-        return {"success": False, "error": "Database connection failed"}
+        return {"success": False, "error": "Database not configured. Use Demo Mode instead."}
     
     try:
         response = client.auth.sign_in_with_password({
@@ -105,7 +119,7 @@ def logout_user():
         try:
             client.auth.sign_out()
         except:
-            pass  # Ignore logout errors
+            pass
 
 
 def is_authenticated() -> bool:
@@ -140,25 +154,33 @@ def render_auth_page():
     """, unsafe_allow_html=True)
     
     st.markdown('<div class="auth-header">', unsafe_allow_html=True)
-    st.markdown("# 🧬 Digital Twin")
+    st.markdown("# 🧬 Aevum")
     st.markdown("### Longevity Health Dashboard")
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Tab selection for Login/Signup
-    tab1, tab2 = st.tabs(["🔑 Login", "📝 Sign Up"])
+    # Check if Supabase is configured
+    client = get_supabase_client()
+    supabase_configured = client is not None
     
-    with tab1:
-        render_login_form()
+    if supabase_configured:
+        # Tab selection for Login/Signup
+        tab1, tab2 = st.tabs(["🔑 Login", "📝 Sign Up"])
+        
+        with tab1:
+            render_login_form()
+        
+        with tab2:
+            render_signup_form()
+        
+        st.markdown("---")
     
-    with tab2:
-        render_signup_form()
-    
-    # Demo mode option
-    st.markdown("---")
-    if st.button("🎮 Try Demo Mode (No Account Required)", use_container_width=True):
+    # Demo mode option (always available)
+    st.markdown("### 🎮 Try the Demo")
+    st.markdown("No account needed - explore with sample data!")
+    if st.button("Enter Demo Mode", use_container_width=True, type="primary"):
         st.session_state['authenticated'] = True
         st.session_state['user_id'] = 'demo_user'
-        st.session_state['user_email'] = 'demo@example.com'
+        st.session_state['user_email'] = 'demo@aevum.app'
         st.session_state['demo_mode'] = True
         st.rerun()
 
@@ -247,7 +269,6 @@ def save_user_data(data_type: str, data: dict) -> bool:
         }).execute()
         return True
     except Exception as e:
-        st.error(f"Failed to save data: {e}")
         return False
 
 
