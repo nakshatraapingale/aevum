@@ -108,8 +108,8 @@ def create_pace_speedometer(pace):
 
 def create_traffic_light_chart(biomarkers_df):
     """Create traffic light visualization for biomarker status."""
-    colors = {'optimal': '#10b981', 'suboptimal': '#f59e0b', 'low': '#ef4444', 
-              'high': '#ef4444', 'unknown': '#6b7280'}
+    colors = {'optimal': '#00d26a', 'suboptimal': '#ffb800', 'low': '#ff3b5c', 
+              'high': '#ff3b5c', 'unknown': '#6b7280'}
     
     fig = go.Figure()
     
@@ -155,13 +155,13 @@ def create_organ_system_radar(organ_scores):
         theta=systems + [systems[0]],
         fill='toself',
         fillcolor='rgba(99, 102, 241, 0.3)',
-        line=dict(color='#6366f1', width=2),
+        line=dict(color='#00f0ff', width=2),
         name='Your Score'
     ))
     fig.add_trace(go.Scatterpolar(
         r=[80] * (len(systems) + 1),
         theta=systems + [systems[0]],
-        line=dict(color='#10b981', dash='dash', width=1),
+        line=dict(color='#00d26a', dash='dash', width=1),
         name='Optimal Threshold'
     ))
     
@@ -224,13 +224,13 @@ def create_lag_analysis_chart(lag_results):
         x=df['lag_days'],
         y=df['correlation'],
         mode='lines+markers',
-        line=dict(color='#6366f1', width=2),
+        line=dict(color='#00f0ff', width=2),
         marker=dict(size=8)
     ))
     
     optimal = lag_results.get('optimal_lag')
     if optimal:
-        fig.add_vline(x=optimal['lag_days'], line_dash="dash", line_color="#a855f7",
+        fig.add_vline(x=optimal['lag_days'], line_dash="dash", line_color="#00d4ff",
                       annotation_text=f"Optimal lag: {optimal['lag_days']} days",
                       annotation_font_color="#a0a0b0")
     
@@ -268,25 +268,25 @@ def main():
     # User is authenticated - show the dashboard
     user = get_current_user()
     
-    st.markdown('<div class="main-title">🧬 Aevum</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">Aevum</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">Longevity-Optimized Health Analytics • Blood Biomarkers + WHOOP Integration</div>', unsafe_allow_html=True)
     
     # Sidebar
     with st.sidebar:
         # User info and logout
-        st.markdown(f"**👤 {user['email']}**")
+        st.markdown(f"**{user['email']}**")
         if st.session_state.get('demo_mode'):
-            st.caption("🎮 Demo Mode")
-        if st.button("🚪 Logout", use_container_width=True):
+            st.caption("Demo Mode")
+        if st.button("Logout", use_container_width=True):
             logout_user()
             st.rerun()
         
         st.divider()
         
-        st.header("⚙️ Settings")
+        st.header("Settings")
         st.session_state.chronological_age = st.number_input("Chronological Age", 18, 100, st.session_state.chronological_age)
         
-        st.subheader("📊 Data Upload")
+        st.subheader("Data Upload")
         blood_file = st.file_uploader("Upload Blood Results (PDF or CSV)", type=['pdf', 'csv'])
         whoop_file = st.file_uploader("Upload WHOOP Export (CSV)", type=['csv'])
         
@@ -294,10 +294,10 @@ def main():
             try:
                 if blood_file.name.lower().endswith('.pdf'):
                     st.session_state.blood_data = pdf_to_dataframe(blood_file)
-                    st.success("✅ Blood data extracted from PDF!")
+                    st.success("Blood data extracted from PDF!")
                 else:
                     st.session_state.blood_data = pd.read_csv(blood_file)
-                    st.success("✅ Blood data loaded from CSV!")
+                    st.success("Blood data loaded from CSV!")
             except Exception as e:
                 st.error(f"Error parsing file: {e}")
         
@@ -308,13 +308,13 @@ def main():
             except Exception as e:
                 st.error(f"Error: {e}")
         
-        if st.button("🔄 Load Sample Data"):
+        if st.button("Load Sample Data"):
             st.session_state.blood_data = create_sample_blood_data()
             st.session_state.whoop_data = create_sample_whoop_data(90)
             st.success("Sample data loaded!")
     
     # Main tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["🎂 Bio-Age Summary", "🚦 Optimal Zone", "📈 Correlations", "💊 Actionable Protocol"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Bio-Age Summary", "Optimal Zone", "Correlations", "Actionable Protocol"])
     
     # Get latest blood values
     blood_df = st.session_state.blood_data
@@ -417,7 +417,7 @@ def render_bioage_tab(latest_blood):
 
 def render_optimal_zone_tab(latest_blood):
     """Render Optimal Zone tab with traffic light system."""
-    st.header("🚦 Longevity Optimal Zone Analysis")
+    st.header("Longevity Optimal Zone Analysis")
     st.caption("Green = Optimal | Yellow = Lab Normal but Longevity Sub-Optimal | Red = Outside Range")
     
     # Build biomarker status dataframe
@@ -455,13 +455,13 @@ def render_optimal_zone_tab(latest_blood):
         critical_count = len(status_df[status_df['status'].isin(['low', 'high'])])
         
         with col1:
-            st.metric("✅ Optimal", optimal_count, f"{optimal_count/len(status_df)*100:.0f}%")
+            st.metric("Optimal", optimal_count, f"{optimal_count/len(status_df)*100:.0f}%")
         with col2:
             st.metric("⚠️ Sub-Optimal", suboptimal_count)
         with col3:
             st.metric("🔴 Critical", critical_count)
         with col4:
-            st.metric("📊 Total Markers", len(status_df))
+            st.metric("Total Markers", len(status_df))
         
         # Filter by category
         categories = ['All'] + list(status_df['category'].unique())
@@ -483,7 +483,7 @@ def render_optimal_zone_tab(latest_blood):
 
 def render_correlation_tab():
     """Render Correlation Matrix tab."""
-    st.header("📈 Cross-Dataset Correlation Analysis")
+    st.header("Cross-Dataset Correlation Analysis")
     
     blood_df = st.session_state.blood_data
     whoop_df = st.session_state.whoop_data
@@ -554,7 +554,7 @@ def render_correlation_tab():
 
 def render_protocol_tab(latest_blood):
     """Render Actionable Protocol tab."""
-    st.header("💊 Actionable Intervention Protocol")
+    st.header("Actionable Intervention Protocol")
     
     # Get organ scores for summary
     organ_scores = calculate_organ_system_scores(latest_blood)

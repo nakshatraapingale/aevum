@@ -138,62 +138,79 @@ def get_current_user() -> Optional[Dict]:
 
 
 def render_auth_page():
-    """Render the login/signup page with modern design."""
+    """Render the login/signup page with WHOOP-inspired design."""
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
     
-    .login-wrapper {
-        min-height: 80vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .login-logo { font-size: 4rem; margin-bottom: 1rem; display: block; }
-    
-    .login-title {
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    .login-logo {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: #00f0ff;
+        letter-spacing: -0.03em;
         margin-bottom: 0.5rem;
-        font-family: 'Inter', sans-serif;
+        animation: fadeInUp 0.6s ease-out;
     }
+    
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes glow {
+        0%, 100% { text-shadow: 0 0 20px rgba(0, 240, 255, 0.5); }
+        50% { text-shadow: 0 0 40px rgba(0, 240, 255, 0.8), 0 0 60px rgba(0, 240, 255, 0.4); }
+    }
+    
+    .login-logo { animation: fadeInUp 0.6s ease-out, glow 3s ease-in-out infinite; }
     
     .login-subtitle {
-        color: #a0a0b0;
+        color: #6b7280;
         font-size: 1rem;
-        margin-bottom: 2rem;
-        font-family: 'Inter', sans-serif;
+        font-weight: 400;
+        margin-bottom: 2.5rem;
+        animation: fadeInUp 0.6s ease-out 0.1s backwards;
     }
     
     .feature-list {
         text-align: left;
         margin: 2rem 0;
         padding: 1.5rem;
-        background: rgba(99, 102, 241, 0.1);
-        border-radius: 16px;
-        border: 1px solid rgba(99, 102, 241, 0.2);
+        background: #141414;
+        border-radius: 12px;
+        border: 1px solid #222222;
+        animation: fadeInUp 0.6s ease-out 0.3s backwards;
     }
     
     .feature-item {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.5rem 0;
-        color: #e0e0e0;
+        padding: 0.6rem 0;
+        color: #9ca3af;
         font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Nunito', sans-serif;
+        border-bottom: 1px solid #1a1a1a;
+    }
+    
+    .feature-item:last-child { border-bottom: none; }
+    
+    .feature-dot {
+        width: 8px;
+        height: 8px;
+        background: #00f0ff;
+        border-radius: 50%;
+        flex-shrink: 0;
     }
     
     .divider-text {
-        color: #606070;
-        font-size: 0.85rem;
+        color: #4b5563;
+        font-size: 0.8rem;
         margin: 1.5rem 0;
         text-align: center;
-        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: 'Nunito', sans-serif;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -202,10 +219,9 @@ def render_auth_page():
     
     with col2:
         st.markdown("""
-        <div style="text-align: center; padding: 2rem 0;">
-            <span class="login-logo">🧬</span>
-            <div class="login-title">Aevum</div>
-            <div class="login-subtitle">Your Personal Longevity Dashboard</div>
+        <div style="text-align: center; padding: 3rem 0 2rem 0;">
+            <div class="login-logo">aevum</div>
+            <div class="login-subtitle">longevity analytics platform</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -213,15 +229,15 @@ def render_auth_page():
         supabase_configured = client is not None
         
         if supabase_configured:
-            tab1, tab2 = st.tabs(["🔑 Sign In", "✨ Create Account"])
+            tab1, tab2 = st.tabs(["Sign In", "Create Account"])
             with tab1:
                 render_login_form()
             with tab2:
                 render_signup_form()
         
-        st.markdown('<div class="divider-text">— or explore without an account —</div>', unsafe_allow_html=True)
+        st.markdown('<div class="divider-text">or explore without an account</div>', unsafe_allow_html=True)
         
-        if st.button("🚀 Try Demo Mode", use_container_width=True, type="primary"):
+        if st.button("Try Demo Mode", use_container_width=True, type="primary"):
             st.session_state['authenticated'] = True
             st.session_state['user_id'] = 'demo_user'
             st.session_state['user_email'] = 'demo@aevum.app'
@@ -230,10 +246,10 @@ def render_auth_page():
         
         st.markdown("""
         <div class="feature-list">
-            <div class="feature-item"><span>🔬</span> Blood biomarker analysis with longevity ranges</div>
-            <div class="feature-item"><span>⌚</span> WHOOP biometrics integration</div>
-            <div class="feature-item"><span>🧠</span> Biological age estimation</div>
-            <div class="feature-item"><span>💊</span> Personalized health protocols</div>
+            <div class="feature-item"><span class="feature-dot"></span> Blood biomarker analysis with longevity ranges</div>
+            <div class="feature-item"><span class="feature-dot"></span> Wearable biometrics integration</div>
+            <div class="feature-item"><span class="feature-dot"></span> Biological age estimation</div>
+            <div class="feature-item"><span class="feature-dot"></span> Personalized health protocols</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -244,8 +260,8 @@ def render_login_form():
     with st.form("login_form"):
         st.subheader("Welcome Back!")
         
-        email = st.text_input("📧 Email", placeholder="your@email.com")
-        password = st.text_input("🔒 Password", type="password", placeholder="Your password")
+        email = st.text_input("Email", placeholder="your@email.com")
+        password = st.text_input("Password", type="password", placeholder="Your password")
         
         submitted = st.form_submit_button("Login", use_container_width=True, type="primary")
         
@@ -261,10 +277,10 @@ def render_login_form():
                     st.session_state['user_id'] = result['user_id']
                     st.session_state['user_email'] = result['email']
                     st.session_state['demo_mode'] = False
-                    st.success("✅ Login successful!")
+                    st.success("Login successful!")
                     st.rerun()
                 else:
-                    st.error(f"❌ {result['error']}")
+                    st.error(f"{result['error']}")
 
 
 def render_signup_form():
@@ -272,9 +288,9 @@ def render_signup_form():
     with st.form("signup_form"):
         st.subheader("Create Your Account")
         
-        email = st.text_input("📧 Email", placeholder="your@email.com", key="signup_email")
-        password = st.text_input("🔒 Password", type="password", placeholder="Min 6 characters", key="signup_pass")
-        password_confirm = st.text_input("🔒 Confirm Password", type="password", placeholder="Repeat password", key="signup_pass2")
+        email = st.text_input("Email", placeholder="your@email.com", key="signup_email")
+        password = st.text_input("Password", type="password", placeholder="Min 6 characters", key="signup_pass")
+        password_confirm = st.text_input("Confirm Password", type="password", placeholder="Repeat password", key="signup_pass2")
         
         submitted = st.form_submit_button("Create Account", use_container_width=True, type="primary")
         
@@ -290,10 +306,10 @@ def render_signup_form():
                     result = signup_user(email, password)
                 
                 if result["success"]:
-                    st.success(f"✅ {result['message']}")
+                    st.success(f"{result['message']}")
                     st.info("You can now log in with your credentials.")
                 else:
-                    st.error(f"❌ {result['error']}")
+                    st.error(f"{result['error']}")
 
 
 def save_user_data(data_type: str, data: dict) -> bool:
