@@ -25,7 +25,7 @@ from modules.correlation_analysis import (calculate_correlation_matrix, lagging_
 from modules.insights_engine import generate_protocol, summarize_health_status
 from modules.auth import (render_auth_page, is_authenticated, get_current_user,
                           logout_user, save_user_data, load_user_data)
-from styles import AEVUM_CSS, apply_plotly_theme
+from styles import AEVUM_CSS, apply_plotly_theme, render_health_ring
 
 # Page config
 st.set_page_config(
@@ -365,7 +365,7 @@ def render_bioage_tab(latest_blood):
                 if delta < -2:
                     st.success(f"🎉 Your biological age is {abs(delta):.1f} years YOUNGER than your chronological age!")
                 elif delta > 2:
-                    st.warning(f"⚠️ Your biological age is {delta:.1f} years OLDER than your chronological age.")
+                    st.warning(f"Your biological age is {delta:.1f} years OLDER than your chronological age.")
                 else:
                     st.info("You're aging at a normal rate.")
                 
@@ -396,23 +396,16 @@ def render_bioage_tab(latest_blood):
                      help="Estimated pace of aging. <1.0 = slower aging, >1.0 = faster aging")
             st.caption(dunedin['interpretation'])
     
-    # Organ System Scores
-    st.subheader("🏥 Organ System Health Scores")
+    # Organ System Scores - WHOOP-style visualization
     organ_scores = calculate_organ_system_scores(latest_blood)
     
-    col1, col2 = st.columns([2, 1])
+    # Calculate overall health score (average of all organ scores)
+    valid_scores = [data['score'] for data in organ_scores.values() if data.get('score') is not None]
+    overall_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
     
-    with col1:
-        radar = create_organ_system_radar(organ_scores)
-        if radar:
-            st.plotly_chart(radar, use_container_width=True)
-    
-    with col2:
-        for system, data in organ_scores.items():
-            if data.get('score') is not None:
-                score = data['score']
-                color = 'green' if score >= 80 else 'orange' if score >= 60 else 'red'
-                st.markdown(f"**{system}**: <span style='color:{color}'>{score:.0f}/100</span> - {data['interpretation']}", unsafe_allow_html=True)
+    # Render the WHOOP-style health ring
+    health_ring_html = render_health_ring(overall_score, organ_scores)
+    st.markdown(health_ring_html, unsafe_allow_html=True)
 
 
 def render_optimal_zone_tab(latest_blood):
@@ -457,9 +450,9 @@ def render_optimal_zone_tab(latest_blood):
         with col1:
             st.metric("Optimal", optimal_count, f"{optimal_count/len(status_df)*100:.0f}%")
         with col2:
-            st.metric("⚠️ Sub-Optimal", suboptimal_count)
+            st.metric("Sub-Optimal", suboptimal_count)
         with col3:
-            st.metric("🔴 Critical", critical_count)
+            st.metric("Critical", critical_count)
         with col4:
             st.metric("Total Markers", len(status_df))
         
@@ -602,12 +595,12 @@ def render_protocol_tab(latest_blood):
     
     # Weakest systems
     if health_summary.get('weakest_systems'):
-        st.subheader("⚠️ Systems Needing Most Attention")
+        st.subheader("Systems Needing Most Attention")
         for system in health_summary['weakest_systems']:
             st.warning(f"**{system['system']}**: Score {system['score']:.0f}/100 - {system['interpretation']}")
     
     # Download report
-    st.subheader("📥 Export Report")
+    st.subheader("Export Report")
     if st.button("Generate PDF Report"):
         st.info("PDF export feature coming soon! For now, use browser print function.")
 
