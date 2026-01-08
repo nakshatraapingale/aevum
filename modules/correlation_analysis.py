@@ -184,6 +184,14 @@ def performance_ceiling_analysis(df: pd.DataFrame,
     
     results_df = pd.DataFrame(results)
     
+    # Handle empty results
+    if results_df.empty:
+        return {
+            'analysis': [],
+            'significant_ceilings': [],
+            'summary': "Insufficient data for performance ceiling analysis."
+        }
+    
     # Identify significant ceiling effects
     significant_effects = results_df[results_df['significant'] & results_df['ceiling_effect']]
     
