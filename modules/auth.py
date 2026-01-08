@@ -138,51 +138,105 @@ def get_current_user() -> Optional[Dict]:
 
 
 def render_auth_page():
-    """Render the login/signup page."""
+    """Render the login/signup page with modern design."""
     st.markdown("""
     <style>
-    .auth-container {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 2rem;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    .login-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .auth-header {
-        text-align: center;
+    
+    .login-logo { font-size: 4rem; margin-bottom: 1rem; display: block; }
+    
+    .login-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .login-subtitle {
+        color: #a0a0b0;
+        font-size: 1rem;
         margin-bottom: 2rem;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .feature-list {
+        text-align: left;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 16px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        color: #e0e0e0;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .divider-text {
+        color: #606070;
+        font-size: 0.85rem;
+        margin: 1.5rem 0;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
     }
     </style>
     """, unsafe_allow_html=True)
     
-    st.markdown('<div class="auth-header">', unsafe_allow_html=True)
-    st.markdown("# 🧬 Aevum")
-    st.markdown("### Longevity Health Dashboard")
-    st.markdown('</div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    # Check if Supabase is configured
-    client = get_supabase_client()
-    supabase_configured = client is not None
-    
-    if supabase_configured:
-        # Tab selection for Login/Signup
-        tab1, tab2 = st.tabs(["🔑 Login", "📝 Sign Up"])
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 2rem 0;">
+            <span class="login-logo">🧬</span>
+            <div class="login-title">Aevum</div>
+            <div class="login-subtitle">Your Personal Longevity Dashboard</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        with tab1:
-            render_login_form()
+        client = get_supabase_client()
+        supabase_configured = client is not None
         
-        with tab2:
-            render_signup_form()
+        if supabase_configured:
+            tab1, tab2 = st.tabs(["🔑 Sign In", "✨ Create Account"])
+            with tab1:
+                render_login_form()
+            with tab2:
+                render_signup_form()
         
-        st.markdown("---")
-    
-    # Demo mode option (always available)
-    st.markdown("### 🎮 Try the Demo")
-    st.markdown("No account needed - explore with sample data!")
-    if st.button("Enter Demo Mode", use_container_width=True, type="primary"):
-        st.session_state['authenticated'] = True
-        st.session_state['user_id'] = 'demo_user'
-        st.session_state['user_email'] = 'demo@aevum.app'
-        st.session_state['demo_mode'] = True
-        st.rerun()
+        st.markdown('<div class="divider-text">— or explore without an account —</div>', unsafe_allow_html=True)
+        
+        if st.button("🚀 Try Demo Mode", use_container_width=True, type="primary"):
+            st.session_state['authenticated'] = True
+            st.session_state['user_id'] = 'demo_user'
+            st.session_state['user_email'] = 'demo@aevum.app'
+            st.session_state['demo_mode'] = True
+            st.rerun()
+        
+        st.markdown("""
+        <div class="feature-list">
+            <div class="feature-item"><span>🔬</span> Blood biomarker analysis with longevity ranges</div>
+            <div class="feature-item"><span>⌚</span> WHOOP biometrics integration</div>
+            <div class="feature-item"><span>🧠</span> Biological age estimation</div>
+            <div class="feature-item"><span>💊</span> Personalized health protocols</div>
+        </div>
+        """, unsafe_allow_html=True)
+
 
 
 def render_login_form():

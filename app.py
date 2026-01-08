@@ -25,6 +25,7 @@ from modules.correlation_analysis import (calculate_correlation_matrix, lagging_
 from modules.insights_engine import generate_protocol, summarize_health_status
 from modules.auth import (render_auth_page, is_authenticated, get_current_user,
                           logout_user, save_user_data, load_user_data)
+from styles import AEVUM_CSS, apply_plotly_theme
 
 # Page config
 st.set_page_config(
@@ -34,19 +35,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
-st.markdown("""
-<style>
-    .main-header {font-size: 2.5rem; font-weight: 700; color: #1f77b4; margin-bottom: 1rem;}
-    .sub-header {font-size: 1.2rem; color: #666; margin-bottom: 2rem;}
-    .metric-card {background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                  padding: 1.5rem; border-radius: 10px; color: white; text-align: center;}
-    .status-optimal {background-color: #28a745; color: white; padding: 0.3rem 0.6rem; border-radius: 4px;}
-    .status-suboptimal {background-color: #ffc107; color: black; padding: 0.3rem 0.6rem; border-radius: 4px;}
-    .status-critical {background-color: #dc3545; color: white; padding: 0.3rem 0.6rem; border-radius: 4px;}
-    .gauge-container {display: flex; justify-content: center; align-items: center;}
-</style>
-""", unsafe_allow_html=True)
+# Apply modern dark theme
+st.markdown(AEVUM_CSS, unsafe_allow_html=True)
 
 
 def create_age_gauge(chronological_age, biological_age):
@@ -75,7 +65,13 @@ def create_age_gauge(chronological_age, biological_age):
             }
         }
     ))
-    fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
+    fig.update_layout(
+        height=300, 
+        margin=dict(l=20, r=20, t=50, b=20),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a0a0b0', family='Inter')
+    )
     return fig
 
 
@@ -100,14 +96,20 @@ def create_pace_speedometer(pace):
             }
         }
     ))
-    fig.update_layout(height=250, margin=dict(l=20, r=20, t=60, b=20))
+    fig.update_layout(
+        height=250, 
+        margin=dict(l=20, r=20, t=60, b=20),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a0a0b0', family='Inter')
+    )
     return fig
 
 
 def create_traffic_light_chart(biomarkers_df):
     """Create traffic light visualization for biomarker status."""
-    colors = {'optimal': '#28a745', 'suboptimal': '#ffc107', 'low': '#dc3545', 
-              'high': '#dc3545', 'unknown': '#6c757d'}
+    colors = {'optimal': '#10b981', 'suboptimal': '#f59e0b', 'low': '#ef4444', 
+              'high': '#ef4444', 'unknown': '#6b7280'}
     
     fig = go.Figure()
     
@@ -127,7 +129,10 @@ def create_traffic_light_chart(biomarkers_df):
         height=max(400, len(biomarkers_df) * 25),
         margin=dict(l=150, r=50, t=30, b=30),
         xaxis={'visible': False},
-        yaxis={'categoryorder': 'total ascending'}
+        yaxis={'categoryorder': 'total ascending'},
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a0a0b0', family='Inter')
     )
     return fig
 
@@ -149,21 +154,29 @@ def create_organ_system_radar(organ_scores):
         r=scores + [scores[0]],
         theta=systems + [systems[0]],
         fill='toself',
-        fillcolor='rgba(31, 119, 180, 0.3)',
-        line=dict(color='rgb(31, 119, 180)', width=2),
+        fillcolor='rgba(99, 102, 241, 0.3)',
+        line=dict(color='#6366f1', width=2),
         name='Your Score'
     ))
     fig.add_trace(go.Scatterpolar(
         r=[80] * (len(systems) + 1),
         theta=systems + [systems[0]],
-        line=dict(color='green', dash='dash', width=1),
+        line=dict(color='#10b981', dash='dash', width=1),
         name='Optimal Threshold'
     ))
     
     fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+        polar=dict(
+            radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(color='#a0a0b0')),
+            bgcolor='rgba(0,0,0,0)',
+            angularaxis=dict(tickfont=dict(color='#a0a0b0'))
+        ),
         showlegend=True,
-        height=400
+        height=400,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a0a0b0', family='Inter'),
+        legend=dict(font=dict(color='#a0a0b0'))
     )
     return fig
 
@@ -188,7 +201,11 @@ def create_correlation_heatmap(corr_data):
     fig.update_layout(
         title='Blood Marker ↔ WHOOP Metric Correlations',
         height=max(400, len(corr_data['blood_markers']) * 30),
-        margin=dict(l=150, r=50, t=50, b=100)
+        margin=dict(l=150, r=50, t=50, b=100),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a0a0b0', family='Inter'),
+        title_font=dict(color='#ffffff')
     )
     return fig
 
@@ -207,21 +224,28 @@ def create_lag_analysis_chart(lag_results):
         x=df['lag_days'],
         y=df['correlation'],
         mode='lines+markers',
-        line=dict(color='#1f77b4', width=2),
+        line=dict(color='#6366f1', width=2),
         marker=dict(size=8)
     ))
     
     optimal = lag_results.get('optimal_lag')
     if optimal:
-        fig.add_vline(x=optimal['lag_days'], line_dash="dash", line_color="red",
-                      annotation_text=f"Optimal lag: {optimal['lag_days']} days")
+        fig.add_vline(x=optimal['lag_days'], line_dash="dash", line_color="#a855f7",
+                      annotation_text=f"Optimal lag: {optimal['lag_days']} days",
+                      annotation_font_color="#a0a0b0")
     
-    fig.add_hline(y=0, line_dash="dot", line_color="gray")
+    fig.add_hline(y=0, line_dash="dot", line_color="#4b5563")
     fig.update_layout(
         title='Time-Lagged Correlation Analysis',
         xaxis_title='Lag (days) - Positive = Blood marker leads',
         yaxis_title='Correlation coefficient',
-        height=350
+        height=350,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a0a0b0', family='Inter'),
+        title_font=dict(color='#ffffff'),
+        xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.05)')
     )
     return fig
 
@@ -244,8 +268,8 @@ def main():
     # User is authenticated - show the dashboard
     user = get_current_user()
     
-    st.markdown('<p class="main-header">🧬 Aevum</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Longevity-Optimized Health Analytics | Blood Biomarkers + WHOOP Integration</p>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">🧬 Aevum</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Longevity-Optimized Health Analytics • Blood Biomarkers + WHOOP Integration</div>', unsafe_allow_html=True)
     
     # Sidebar
     with st.sidebar:
