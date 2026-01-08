@@ -323,3 +323,4 @@ def render_health_ring(overall_score, organ_scores):
     """
     
     return html
+
