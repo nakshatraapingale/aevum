@@ -293,24 +293,36 @@ def render_upload_screen():
         
         st.markdown("<br>", unsafe_allow_html=True)
         
+        # Process uploaded files immediately when they're uploaded
+        if blood_file is not None:
+            try:
+                if blood_file.name.lower().endswith('.pdf'):
+                    df = pdf_to_dataframe(blood_file)
+                else:
+                    df = pd.read_csv(blood_file)
+                
+                if len(df) > 0:
+                    st.session_state.blood_data = df
+                    st.success(f"Loaded {len(df)} records from blood data!")
+                else:
+                    st.warning("No data found in file")
+            except Exception as e:
+                st.error(f"Error parsing file: {e}")
+        
+        if whoop_file is not None:
+            try:
+                st.session_state.whoop_data = parse_whoop_csv(whoop_file)
+                st.success("WHOOP data loaded!")
+            except Exception as e:
+                st.error(f"Error: {e}")
+        
         col_a, col_b = st.columns(2)
         
         with col_a:
-            if st.button("Analyze Data", use_container_width=True, type="primary", disabled=not blood_file):
-                if blood_file:
-                    try:
-                        if blood_file.name.lower().endswith('.pdf'):
-                            st.session_state.blood_data = pdf_to_dataframe(blood_file)
-                        else:
-                            st.session_state.blood_data = pd.read_csv(blood_file)
-                        
-                        if whoop_file:
-                            st.session_state.whoop_data = parse_whoop_csv(whoop_file)
-                        
-                        st.session_state.data_uploaded = True
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error: {e}")
+            analyze_disabled = len(st.session_state.blood_data) == 0
+            if st.button("View Dashboard", use_container_width=True, type="primary", disabled=analyze_disabled):
+                st.session_state.data_uploaded = True
+                st.rerun()
         
         with col_b:
             if st.button("Use Sample Data", use_container_width=True):
@@ -318,6 +330,9 @@ def render_upload_screen():
                 st.session_state.whoop_data = create_sample_whoop_data(90)
                 st.session_state.data_uploaded = True
                 st.rerun()
+        
+        if analyze_disabled:
+            st.caption("Upload a blood test file to enable analysis")
         
         st.markdown("<br>", unsafe_allow_html=True)
         
