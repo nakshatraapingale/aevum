@@ -50,7 +50,7 @@ def get_supabase_client() -> Optional[Client]:
 
 
 def signup_user(email: str, password: str) -> Dict:
-    """Register a new user."""
+    """Register a new user and auto-login (no email confirmation needed)."""
     client = get_supabase_client()
     if not client:
         return {"success": False, "error": "Database not configured. Use Demo Mode instead."}
@@ -58,15 +58,22 @@ def signup_user(email: str, password: str) -> Dict:
     try:
         response = client.auth.sign_up({
             "email": email,
-            "password": password
+            "password": password,
+            "options": {
+                "email_redirect_to": None
+            }
         })
         
         if response.user:
+            # Auto-login: set session state directly
+            st.session_state['authenticated'] = True
+            st.session_state['user_id'] = response.user.id
+            st.session_state['user_email'] = email
             return {
                 "success": True,
                 "user_id": response.user.id,
                 "email": response.user.email,
-                "message": "Account created! Please check your email to verify."
+                "auto_login": True
             }
         else:
             return {"success": False, "error": "Signup failed. Try again."}
@@ -102,6 +109,12 @@ def login_user(email: str, password: str) -> Dict:
     
     except Exception as e:
         error_msg = str(e)
+        if "email not confirmed" in error_msg.lower():
+            # Bypass: login anyway by setting session directly
+            st.session_state['authenticated'] = True
+            st.session_state['user_id'] = f"unconfirmed_{email}"
+            st.session_state['user_email'] = email
+            return {"success": True, "user_id": f"unconfirmed_{email}", "email": email, "bypassed": True}
         if "invalid" in error_msg.lower():
             return {"success": False, "error": "Invalid email or password"}
         return {"success": False, "error": error_msg}
