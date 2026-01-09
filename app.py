@@ -299,15 +299,21 @@ def render_upload_screen():
                 if blood_file.name.lower().endswith('.pdf'):
                     df = pdf_to_dataframe(blood_file)
                 else:
+                    # CSV upload
                     df = pd.read_csv(blood_file)
+                    # Ensure date column exists
+                    if 'date' not in df.columns:
+                        df['date'] = pd.Timestamp.now().strftime('%Y-%m-%d')
                 
                 if len(df) > 0:
                     st.session_state.blood_data = df
-                    st.success(f"Loaded {len(df)} records from blood data!")
+                    st.success(f"Loaded {len(df.columns)-1} biomarkers!")
                 else:
                     st.warning("No data found in file")
             except Exception as e:
-                st.error(f"Error parsing file: {e}")
+                st.error(f"Error: {e}")
+                st.info("**CSV Format:** Create a CSV with columns: date, Glucose, HbA1c, Cholesterol, etc. Example:")
+                st.code("date,Glucose,HbA1c,Cholesterol\n2024-01-15,95,5.2,180", language="csv")
         
         if whoop_file is not None:
             try:
