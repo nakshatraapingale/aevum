@@ -247,6 +247,14 @@ def render_auth_page():
                 render_login_form()
             with tab2:
                 render_signup_form()
+        else:
+            # No Supabase - allow guest access
+            st.info("Sign in to save your data across sessions")
+            if st.button("Continue as Guest", use_container_width=True, type="primary"):
+                st.session_state['authenticated'] = True
+                st.session_state['user_id'] = 'guest_user'
+                st.session_state['user_email'] = 'guest@aevum.app'
+                st.rerun()
         
         st.markdown("""
         <div class="feature-list">
