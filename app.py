@@ -250,73 +250,114 @@ def create_lag_analysis_chart(lag_results):
     return fig
 
 
-# Initialize session state
+# Initialize session state with empty data
 if 'blood_data' not in st.session_state:
-    st.session_state.blood_data = create_sample_blood_data()
+    st.session_state.blood_data = pd.DataFrame()
 if 'whoop_data' not in st.session_state:
-    st.session_state.whoop_data = create_sample_whoop_data(90)
+    st.session_state.whoop_data = pd.DataFrame()
 if 'chronological_age' not in st.session_state:
     st.session_state.chronological_age = 35
+if 'data_uploaded' not in st.session_state:
+    st.session_state.data_uploaded = False
 
 
-def main():
-    # Check authentication first
-    if not is_authenticated():
-        render_auth_page()
-        return
+def render_upload_screen():
+    """Render the data upload screen."""
+    st.markdown('<div class="main-title">aevum</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Upload your health data to get started</div>', unsafe_allow_html=True)
     
-    # User is authenticated - show the dashboard
-    user = get_current_user()
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    st.markdown('<div class="main-title">Aevum</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Longevity-Optimized Health Analytics • Blood Biomarkers + WHOOP Integration</div>', unsafe_allow_html=True)
-    
-    # Sidebar
-    with st.sidebar:
-        # User info and logout
-        st.markdown(f"**{user['email']}**")
-        if st.session_state.get('demo_mode'):
-            st.caption("Demo Mode")
+    with col2:
+        st.markdown("""
+        <div style="background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem;">
+            <h3 style="color: #fff; margin-bottom: 1rem; font-size: 1.1rem;">Blood Test Results</h3>
+            <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">Upload your blood work PDF or CSV file</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        blood_file = st.file_uploader("Blood Results", type=['pdf', 'csv'], label_visibility="collapsed")
+        
+        st.markdown("""
+        <div style="background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px; padding: 2rem; margin: 1.5rem 0;">
+            <h3 style="color: #fff; margin-bottom: 1rem; font-size: 1.1rem;">WHOOP Data (Optional)</h3>
+            <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">Export from WHOOP app for correlations</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        whoop_file = st.file_uploader("WHOOP Export", type=['csv'], label_visibility="collapsed")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.session_state.chronological_age = st.number_input("Your Age", 18, 100, st.session_state.chronological_age)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        col_a, col_b = st.columns(2)
+        
+        with col_a:
+            if st.button("Analyze Data", use_container_width=True, type="primary", disabled=not blood_file):
+                if blood_file:
+                    try:
+                        if blood_file.name.lower().endswith('.pdf'):
+                            st.session_state.blood_data = pdf_to_dataframe(blood_file)
+                        else:
+                            st.session_state.blood_data = pd.read_csv(blood_file)
+                        
+                        if whoop_file:
+                            st.session_state.whoop_data = parse_whoop_csv(whoop_file)
+                        
+                        st.session_state.data_uploaded = True
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+        
+        with col_b:
+            if st.button("Use Sample Data", use_container_width=True):
+                st.session_state.blood_data = create_sample_blood_data()
+                st.session_state.whoop_data = create_sample_whoop_data(90)
+                st.session_state.data_uploaded = True
+                st.rerun()
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         if st.button("Logout", use_container_width=True):
             logout_user()
             st.rerun()
+
+
+def render_dashboard():
+    """Render the main dashboard with analysis."""
+    user = get_current_user()
+    
+    st.markdown('<div class="main-title">aevum</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">Longevity Analytics Dashboard</div>', unsafe_allow_html=True)
+    
+    # Sidebar
+    with st.sidebar:
+        st.markdown(f"**{user['email']}**")
+        if st.session_state.get('demo_mode'):
+            st.caption("Demo Mode")
         
         st.divider()
         
-        st.header("Settings")
-        st.session_state.chronological_age = st.number_input("Chronological Age", 18, 100, st.session_state.chronological_age)
+        st.session_state.chronological_age = st.number_input("Age", 18, 100, st.session_state.chronological_age)
         
-        st.subheader("Data Upload")
-        blood_file = st.file_uploader("Upload Blood Results (PDF or CSV)", type=['pdf', 'csv'])
-        whoop_file = st.file_uploader("Upload WHOOP Export (CSV)", type=['csv'])
+        st.divider()
         
-        if blood_file:
-            try:
-                if blood_file.name.lower().endswith('.pdf'):
-                    st.session_state.blood_data = pdf_to_dataframe(blood_file)
-                    st.success("Blood data extracted from PDF!")
-                else:
-                    st.session_state.blood_data = pd.read_csv(blood_file)
-                    st.success("Blood data loaded from CSV!")
-            except Exception as e:
-                st.error(f"Error parsing file: {e}")
+        if st.button("Upload New Data", use_container_width=True):
+            st.session_state.data_uploaded = False
+            st.session_state.blood_data = pd.DataFrame()
+            st.session_state.whoop_data = pd.DataFrame()
+            st.rerun()
         
-        if whoop_file:
-            try:
-                st.session_state.whoop_data = parse_whoop_csv(whoop_file)
-                st.success("WHOOP data loaded!")
-            except Exception as e:
-                st.error(f"Error: {e}")
-        
-        if st.button("Load Sample Data"):
-            st.session_state.blood_data = create_sample_blood_data()
-            st.session_state.whoop_data = create_sample_whoop_data(90)
-            st.success("Sample data loaded!")
+        if st.button("Logout", use_container_width=True):
+            logout_user()
+            st.rerun()
     
     # Main tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["Bio-Age Summary", "Optimal Zone", "Correlations", "Actionable Protocol"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Bio-Age", "Optimal Zone", "Correlations", "Protocol"])
     
-    # Get latest blood values
     blood_df = st.session_state.blood_data
     latest_blood = blood_df.iloc[-1].to_dict() if len(blood_df) > 0 else {}
     
@@ -331,6 +372,19 @@ def main():
     
     with tab4:
         render_protocol_tab(latest_blood)
+
+
+def main():
+    # Check authentication first
+    if not is_authenticated():
+        render_auth_page()
+        return
+    
+    # Check if data is uploaded
+    if not st.session_state.get('data_uploaded', False) or len(st.session_state.blood_data) == 0:
+        render_upload_screen()
+    else:
+        render_dashboard()
 
 
 def render_bioage_tab(latest_blood):
