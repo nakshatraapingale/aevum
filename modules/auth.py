@@ -53,7 +53,7 @@ def signup_user(email: str, password: str) -> Dict:
     """Register a new user and auto-login (no email confirmation needed)."""
     client = get_supabase_client()
     if not client:
-        return {"success": False, "error": "Database not configured. Use Demo Mode instead."}
+        return {"success": False, "error": "Database not configured. Please configure database credentials."}
     
     try:
         response = client.auth.sign_up({
@@ -89,7 +89,7 @@ def login_user(email: str, password: str) -> Dict:
     """Authenticate an existing user."""
     client = get_supabase_client()
     if not client:
-        return {"success": False, "error": "Database not configured. Use Demo Mode instead."}
+        return {"success": False, "error": "Database not configured. Please configure database credentials."}
     
     try:
         response = client.auth.sign_in_with_password({
@@ -247,15 +247,6 @@ def render_auth_page():
                 render_login_form()
             with tab2:
                 render_signup_form()
-        
-        st.markdown('<div class="divider-text">or explore without an account</div>', unsafe_allow_html=True)
-        
-        if st.button("Try Demo Mode", use_container_width=True, type="primary"):
-            st.session_state['authenticated'] = True
-            st.session_state['user_id'] = 'demo_user'
-            st.session_state['user_email'] = 'demo@aevum.app'
-            st.session_state['demo_mode'] = True
-            st.rerun()
         
         st.markdown("""
         <div class="feature-list">

@@ -316,20 +316,10 @@ def render_upload_screen():
             except Exception as e:
                 st.error(f"Error: {e}")
         
-        col_a, col_b = st.columns(2)
-        
-        with col_a:
-            analyze_disabled = len(st.session_state.blood_data) == 0
-            if st.button("View Dashboard", use_container_width=True, type="primary", disabled=analyze_disabled):
-                st.session_state.data_uploaded = True
-                st.rerun()
-        
-        with col_b:
-            if st.button("Use Sample Data", use_container_width=True):
-                st.session_state.blood_data = create_sample_blood_data()
-                st.session_state.whoop_data = create_sample_whoop_data(90)
-                st.session_state.data_uploaded = True
-                st.rerun()
+        analyze_disabled = len(st.session_state.blood_data) == 0
+        if st.button("View Dashboard", use_container_width=True, type="primary", disabled=analyze_disabled):
+            st.session_state.data_uploaded = True
+            st.rerun()
         
         if analyze_disabled:
             st.caption("Upload a blood test file to enable analysis")
@@ -351,8 +341,6 @@ def render_dashboard():
     # Sidebar
     with st.sidebar:
         st.markdown(f"**{user['email']}**")
-        if st.session_state.get('demo_mode'):
-            st.caption("Demo Mode")
         
         st.divider()
         
