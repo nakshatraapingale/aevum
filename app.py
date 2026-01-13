@@ -1044,18 +1044,21 @@ def render_dashboard():
     col1, col2, col3 = st.columns([1.2, 1, 1])
     
     with col1:
-        st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
-        st.markdown('<div class="tagline">grow young</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">Health Score</div>', unsafe_allow_html=True)
-        
         score = summary['overall_health_score']
+        status = get_status_label(score)
+        status_class = get_score_class(score)
+        
+        st.markdown(f'''
+        <div class="card" style="text-align: center;">
+            <div class="tagline">grow young</div>
+            <div class="card-title">Health Score</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        
         fig = create_score_gauge(score, size=200)
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
         
-        status = get_status_label(score)
-        status_class = get_score_class(score)
         st.markdown(f'<div class="system-status status-{status_class}" style="margin-top: -15px;">{status}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
         bio_age = summary['bio_age']
