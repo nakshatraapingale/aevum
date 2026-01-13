@@ -1086,36 +1086,112 @@ def run_titan_engine(raw_labs: Dict, chronological_age: int = 35, sex: str = "ma
 
 
 def generate_insights(systems: List[Dict], bio_age: Dict, pace: Dict) -> List[str]:
-    """Generate actionable insights from the analysis."""
+    """Generate actionable insights with specific recommendations."""
+    
+    # Actionable recommendations for each biomarker
+    RECOMMENDATIONS = {
+        # Vitamins & Minerals
+        'Vitamin_D': "Take Vitamin D3 (2000-4000 IU daily) with fatty meal, or get 15-20 min sunlight",
+        'Vitamin_B12': "Take methylcobalamin B12 supplement, or eat eggs, fish, and fortified cereals",
+        'Iron': "Eat spinach, lentils, red meat, or pair iron-rich foods with vitamin C for absorption",
+        'Ferritin': "Increase iron intake: liver, beans, fortified cereals. Avoid tea/coffee with meals",
+        'Folate': "Eat leafy greens (spinach, kale), lentils, asparagus, or take methylfolate supplement",
+        
+        # Lipids
+        'LDL': "Reduce saturated fats, eat oats, nuts, olive oil. Consider plant sterols or fiber supplement",
+        'HDL': "Exercise 30 min daily, eat fatty fish, avocados, olive oil. Limit refined carbs",
+        'Triglycerides': "Cut sugar and refined carbs, eat fatty fish 2x/week, limit alcohol",
+        'ApoB': "Reduce saturated fat, increase soluble fiber (oats, psyllium), consider statins if high",
+        'Non_HDL': "Focus on fiber-rich foods, omega-3s from fish, and reduce processed foods",
+        'Total_Cholesterol': "Eat more fiber, reduce red meat, add plant sterols from nuts and seeds",
+        
+        # Blood Sugar
+        'Glucose': "Reduce refined carbs, eat more fiber, walk 15 min after meals",
+        'HbA1c': "Low glycemic diet, regular exercise, consider berberine or cinnamon supplements",
+        'Fasting_Insulin': "Intermittent fasting, reduce carbs, strength training helps insulin sensitivity",
+        'HOMA_IR': "Exercise regularly, reduce sugar intake, consider metformin if pre-diabetic",
+        
+        # Inflammation
+        'hs_CRP': "Eat turmeric, ginger, fatty fish. Reduce sugar, processed foods, and stress",
+        'ESR': "Anti-inflammatory diet: berries, leafy greens, fatty fish. Check for underlying causes",
+        'Homocysteine': "Take B-complex (B6, B12, folate), eat leafy greens, reduce alcohol",
+        
+        # Liver
+        'ALT': "Limit alcohol, avoid acetaminophen overuse, eat cruciferous vegetables, milk thistle",
+        'AST': "Reduce alcohol, exercise moderately, eat antioxidant-rich foods (berries, greens)",
+        'GGT': "Stop alcohol completely for 30 days, drink coffee, eat sulfur-rich foods (garlic, onions)",
+        'ALP': "Get vitamin D and zinc levels checked, eat dairy and leafy greens",
+        'Bilirubin': "Stay hydrated, eat beets and carrots, avoid alcohol",
+        
+        # Kidney
+        'Creatinine': "Stay well hydrated, reduce protein if very high intake, avoid NSAIDs",
+        'BUN': "Drink more water, moderate protein intake, avoid excessive salt",
+        'Uric_Acid': "Avoid beer and organ meats, drink tart cherry juice, stay hydrated",
+        'eGFR': "Control blood pressure, stay hydrated, limit salt and protein if low",
+        'Cystatin_C': "Maintain healthy weight, control blood pressure, stay hydrated",
+        
+        # Blood
+        'Hemoglobin': "Eat iron-rich foods (red meat, spinach), vitamin C for absorption, B12 if deficient",
+        'RBC': "Eat iron and B12 rich foods, check for underlying bleeding if low",
+        'WBC': "Get enough sleep, manage stress, eat zinc-rich foods (pumpkin seeds, meat)",
+        'Platelets': "Eat folate-rich foods, avoid alcohol if low, check B12 levels",
+        'MCV': "If high: check B12/folate. If low: check iron. Eat balanced diet with leafy greens",
+        'RDW': "Address underlying deficiencies (iron, B12, folate), eat nutrient-dense foods",
+        
+        # Thyroid
+        'TSH': "If high: check iodine intake, selenium (Brazil nuts). If low: reduce stress, check thyroid",
+        'T3': "Eat selenium (Brazil nuts), zinc, avoid excessive soy, manage stress",
+        'T4': "Ensure adequate iodine (seaweed, iodized salt), avoid goitrogens if low",
+        
+        # Hormones
+        'Testosterone': "Lift weights, sleep 7-8 hrs, eat zinc (oysters, meat), reduce alcohol",
+        'Cortisol': "Practice stress management, sleep hygiene, adaptogenic herbs (ashwagandha)",
+        'DHEA': "Manage stress, exercise regularly, consider DHEA supplement if very low",
+        
+        # Other
+        'Albumin': "Eat adequate protein (eggs, fish, meat), stay hydrated",
+        'Total_Protein': "Increase protein intake: eggs, fish, legumes, dairy",
+        'Magnesium': "Eat nuts, seeds, dark chocolate, leafy greens. Consider magnesium glycinate supplement",
+        'Zinc': "Eat oysters, pumpkin seeds, beef, or take zinc picolinate supplement",
+        'Calcium': "Dairy products, fortified plant milk, leafy greens, sardines with bones",
+    }
+    
     insights = []
+    
+    # Collect all poorly scoring markers across systems
+    poor_markers = []
+    for system in systems:
+        for marker in system.get('markers_used', []):
+            if marker.get('score', 100) < 60:
+                poor_markers.append({
+                    'id': marker['id'],
+                    'score': marker['score'],
+                    'value': marker['value'],
+                    'system': system['name']
+                })
+    
+    # Sort by score (worst first)
+    poor_markers.sort(key=lambda x: x['score'])
+    
+    # Generate actionable insights for poor markers
+    for marker in poor_markers[:4]:  # Top 4 worst markers
+        marker_id = marker['id']
+        if marker_id in RECOMMENDATIONS:
+            insights.append(f"{marker_id.replace('_', ' ')}: {RECOMMENDATIONS[marker_id]}")
+        else:
+            insights.append(f"Improve {marker_id.replace('_', ' ')} (score: {marker['score']:.0f}) - consult your doctor")
+    
+    # Add positive insight if doing well
+    optimal_systems = [s for s in systems if s['score'] >= 80]
+    if optimal_systems and len(insights) < 5:
+        names = ', '.join(s['name'] for s in optimal_systems[:2])
+        insights.append(f"Great job! Your {names} markers are in optimal range - keep it up!")
     
     # Bio age insight
     delta = bio_age['age_delta']
-    if delta < -2:
-        insights.append(f"Your biological age is {abs(delta):.1f} years younger than your actual age")
-    elif delta > 2:
-        insights.append(f"Priority: Your biological age is {delta:.1f} years older than actual age")
+    if delta < -3 and len(insights) < 6:
+        insights.append(f"Excellent! Your biological age is {abs(delta):.1f} years younger than actual")
+    elif delta > 3 and len(insights) < 6:
+        insights.append(f"Focus on the recommendations above to reduce your biological age")
     
-    # Pace insight
-    if pace['pace'] > 1.15:
-        insights.append("Your pace of aging is elevated - focus on inflammation and metabolic markers")
-    elif pace['pace'] < 0.9:
-        insights.append("Excellent! You're aging slower than average")
-    
-    # System-specific insights
-    risk_systems = [s for s in systems if s['status'] == 'Risk']
-    fair_systems = [s for s in systems if s['status'] == 'Fair']
-    
-    for system in risk_systems[:2]:  # Top 2 at-risk systems
-        insights.append(f"Attention needed: {system['name']} score is {system['score']:.0f}")
-    
-    for system in fair_systems[:1]:  # Top 1 fair system
-        if system not in risk_systems:
-            insights.append(f"Room for improvement: {system['name']} score is {system['score']:.0f}")
-    
-    # Optimal systems
-    optimal_systems = [s for s in systems if s['status'] == 'Optimal']
-    if optimal_systems:
-        insights.append(f"Strong performance in {', '.join(s['name'] for s in optimal_systems[:2])}")
-    
-    return insights[:5]  # Return top 5 insights
+    return insights[:6]
