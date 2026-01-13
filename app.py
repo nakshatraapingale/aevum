@@ -78,11 +78,22 @@ h1, h2, h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
-.brand-mark svg {
-    width: 18px;
-    height: 18px;
-    fill: white;
+.brand-mark::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+.brand-mark::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: white;
+    border-radius: 50%;
 }
 
 /* Cards */
@@ -142,13 +153,85 @@ h1, h2, h3 {
     align-items: center;
     justify-content: center;
     background: #ffffff;
+    position: relative;
 }
-.system-icon svg {
-    width: 20px;
-    height: 20px;
-    stroke: #374151;
-    stroke-width: 1.5;
-    fill: none;
+/* CSS-only icons */
+.icon-heart::before {
+    content: '';
+    width: 18px;
+    height: 16px;
+    background: transparent;
+    border: 2px solid #374151;
+    border-radius: 50% 50% 0 0;
+    transform: rotate(-45deg);
+    position: relative;
+    top: -2px;
+}
+.icon-lightning::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 16px solid #374151;
+}
+.icon-shield::before {
+    content: '';
+    width: 14px;
+    height: 16px;
+    border: 2px solid #374151;
+    border-radius: 2px 2px 8px 8px;
+}
+.icon-droplet::before {
+    content: '';
+    width: 12px;
+    height: 16px;
+    border: 2px solid #374151;
+    border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+}
+.icon-brain::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid #374151;
+    border-radius: 50%;
+}
+.icon-liver::before {
+    content: '';
+    width: 18px;
+    height: 12px;
+    border: 2px solid #374151;
+    border-radius: 3px;
+}
+.icon-kidney::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border: 2px solid #374151;
+    border-radius: 50%;
+}
+.icon-kidney::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #374151;
+    border-radius: 50%;
+}
+.icon-hormone::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border: 2px solid #374151;
+    border-radius: 50%;
+}
+.icon-hormone::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #374151;
+    border-radius: 50%;
 }
 .alert-badge {
     background: #fee2e2;
@@ -471,11 +554,22 @@ h1, h2, h3 {
     align-items: center;
     justify-content: center;
     box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+    position: relative;
 }
-.welcome-logo svg {
-    width: 36px;
-    height: 36px;
-    fill: white;
+.welcome-logo::before {
+    content: '';
+    width: 28px;
+    height: 28px;
+    border: 3px solid white;
+    border-radius: 50%;
+}
+.welcome-logo::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
 }
 .welcome-title {
     font-size: 2.25rem;
@@ -509,23 +603,58 @@ h1, h2, h3 {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.feature-icon svg {
-    width: 24px;
-    height: 24px;
+    position: relative;
 }
 .feature-icon.systems {
     background: linear-gradient(135deg, #dbeafe, #bfdbfe);
 }
-.feature-icon.systems svg { stroke: #3b82f6; fill: none; stroke-width: 1.5; }
+.feature-icon.systems::before {
+    content: '';
+    display: grid;
+    grid-template-columns: repeat(2, 8px);
+    grid-template-rows: repeat(2, 8px);
+    gap: 4px;
+}
+.feature-icon.systems::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 2px;
+    box-shadow: 12px 0 0 #3b82f6, 0 12px 0 #3b82f6, 12px 12px 0 #3b82f6;
+}
 .feature-icon.age {
     background: linear-gradient(135deg, #dcfce7, #bbf7d0);
 }
-.feature-icon.age svg { stroke: #22c55e; fill: none; stroke-width: 1.5; }
+.feature-icon.age::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #22c55e;
+    border-radius: 50%;
+}
+.feature-icon.age::after {
+    content: '';
+    position: absolute;
+    width: 2.5px;
+    height: 8px;
+    background: #22c55e;
+    top: 14px;
+    transform-origin: bottom;
+    transform: rotate(45deg);
+}
 .feature-icon.pace {
     background: linear-gradient(135deg, #fef3c7, #fde68a);
 }
-.feature-icon.pace svg { stroke: #f59e0b; fill: none; stroke-width: 1.5; }
+.feature-icon.pace::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 14px solid #f59e0b;
+    margin-left: 4px;
+}
 .feature-title {
     font-size: 0.95rem;
     font-weight: 700;
@@ -590,20 +719,7 @@ h1, h2, h3 {
 # SVG ICONS
 # =============================================================================
 
-ICONS = {
-    'heart': '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>',
-    'lightning': '<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>',
-    'shield': '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
-    'droplet': '<svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>',
-    'brain': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>',
-    'liver': '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"></rect><path d="M12 6v12"></path></svg>',
-    'kidney': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>',
-    'hormone': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><circle cx="12" cy="12" r="9"></circle></svg>',
-    'grid': '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
-    'clock': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>',
-    'activity': '<svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9-6-18-3 9H2"></path></svg>',
-    'logo': '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" fill="none"></circle><circle cx="12" cy="12" r="3" fill="currentColor"></circle></svg>'
-}
+# System icon class mapping (CSS-only icons)
 
 SYSTEM_ICONS = {
     'cardiovascular': 'heart',
@@ -687,35 +803,17 @@ def create_score_gauge(score, size=200):
 def render_system_card(system):
     """Render a system card matching the reference design."""
     score = system['score']
-    color = get_score_color(score)
     status = get_status_label(score)
     status_class = get_score_class(score)
-    icon_name = SYSTEM_ICONS.get(system['system_id'], 'activity')
-    icon_svg = ICONS.get(icon_name, ICONS['activity'])
+    icon_name = SYSTEM_ICONS.get(system['system_id'], 'brain')
+    icon_class = f"icon-{icon_name}"
     markers_count = len(system.get('markers_used', []))
     
     # Count alerts (markers with score < 60)
     alerts = sum(1 for m in system.get('markers_used', []) if m.get('score', 100) < 60)
     alert_html = f'<span class="alert-badge">{alerts} Alerts</span>' if alerts > 0 else ''
     
-    return f"""
-    <div class="system-card">
-        <div class="system-header">
-            <div class="system-icon">{icon_svg}</div>
-            {alert_html}
-        </div>
-        <div class="system-name">{system['name']}</div>
-        <div class="system-score-row">
-            <span class="system-score score-{status_class}">{score:.0f}</span>
-            <span class="system-score-max">/100</span>
-            <span class="system-biomarker-count">{markers_count} Biomarkers</span>
-        </div>
-        <div class="system-progress">
-            <div class="system-progress-bar bg-{status_class}" style="width: {score}%;"></div>
-        </div>
-        <div class="system-status status-{status_class}">{status}</div>
-    </div>
-    """
+    return f"""<div class="system-card"><div class="system-header"><div class="system-icon {icon_class}"></div>{alert_html}</div><div class="system-name">{system['name']}</div><div class="system-score-row"><span class="system-score score-{status_class}">{score:.0f}</span><span class="system-score-max">/100</span><span class="system-biomarker-count">{markers_count} Biomarkers</span></div><div class="system-progress"><div class="system-progress-bar bg-{status_class}" style="width: {score}%;"></div></div><div class="system-status status-{status_class}">{status}</div></div>"""
 
 
 # =============================================================================
@@ -724,9 +822,9 @@ def render_system_card(system):
 
 def render_welcome():
     """Welcome/onboarding page."""
-    st.markdown(f"""
+    st.markdown("""
     <div class="welcome-hero">
-        <div class="welcome-logo">{ICONS['logo']}</div>
+        <div class="welcome-logo"></div>
         <div class="welcome-title">aevum</div>
         <div class="welcome-subtitle">
             Your personal longevity companion. Upload your blood work and discover your biological age, health scores, and personalized insights.
@@ -737,27 +835,27 @@ def render_welcome():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown(f"""
+        st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon systems">{ICONS['grid']}</div>
+            <div class="feature-icon systems"></div>
             <div class="feature-title">8 Health Systems</div>
             <div class="feature-desc">Comprehensive analysis of cardiovascular, metabolic, immune, and more</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown(f"""
+        st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon age">{ICONS['clock']}</div>
+            <div class="feature-icon age"></div>
             <div class="feature-title">Biological Age</div>
             <div class="feature-desc">PhenoAge algorithm calculates your true biological age</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
-        st.markdown(f"""
+        st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon pace">{ICONS['activity']}</div>
+            <div class="feature-icon pace"></div>
             <div class="feature-title">Pace of Aging</div>
             <div class="feature-desc">Are you aging faster or slower than average?</div>
         </div>
@@ -774,9 +872,9 @@ def render_welcome():
 
 def render_upload():
     """Data upload page."""
-    st.markdown(f"""
+    st.markdown("""
     <div class="main-title">
-        <div class="brand-mark">{ICONS['logo']}</div>
+        <div class="brand-mark"></div>
         Upload Your Data
     </div>
     """, unsafe_allow_html=True)
@@ -934,9 +1032,9 @@ def render_dashboard():
     summary = results['summary']
     systems = results['systems']
     
-    st.markdown(f"""
+    st.markdown("""
     <div class="main-title">
-        <div class="brand-mark">{ICONS['logo']}</div>
+        <div class="brand-mark"></div>
         Your Health Report
     </div>
     """, unsafe_allow_html=True)
