@@ -106,12 +106,16 @@ h1, h2, h3 {
     border: 1px solid rgba(0, 0, 0, 0.04);
 }
 .tagline {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #6366f1;
     font-style: italic;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.5px;
+    background: #f8f9fc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
 }
 .card-title {
     font-size: 0.75rem;
