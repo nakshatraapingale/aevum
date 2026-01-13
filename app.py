@@ -988,20 +988,11 @@ def render_upload():
             </div>
             """, unsafe_allow_html=True)
             
-            # Custom table instead of st.dataframe
-            table_rows = ""
-            for k, v in st.session_state.labs.items():
-                val = round(v, 2) if isinstance(v, float) else v
-                table_rows += f"<tr><td>{k}</td><td>{val}</td></tr>"
-            
-            st.markdown(f"""
-            <div style="max-height: 200px; overflow-y: auto; border-radius: 12px; border: 1px solid #e5e7eb;">
-                <table class="biomarker-table">
-                    <thead><tr><th>Biomarker</th><th>Value</th></tr></thead>
-                    <tbody>{table_rows}</tbody>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
+            labs_df = pd.DataFrame([
+                {"Biomarker": k, "Value": round(v, 2) if isinstance(v, float) else v} 
+                for k, v in st.session_state.labs.items()
+            ])
+            st.dataframe(labs_df, use_container_width=True, hide_index=True, height=200)
     
     st.markdown("---")
     
@@ -1162,31 +1153,12 @@ def render_dashboard():
                     'System': system['name'],
                     'Marker': marker['id'],
                     'Value': round(marker['value'], 2),
-                    'Score': round(marker['score'], 0)
+                    'Score': int(round(marker['score'], 0))
                 })
         
         if all_markers:
-            # Custom table
-            table_rows = ""
-            for m in all_markers:
-                score_class = get_score_class(m['Score'])
-                table_rows += f"""
-                <tr>
-                    <td>{m['System']}</td>
-                    <td>{m['Marker']}</td>
-                    <td>{m['Value']}</td>
-                    <td><span class="score-{score_class}" style="font-weight: 700;">{int(m['Score'])}</span></td>
-                </tr>
-                """
-            
-            st.markdown(f"""
-            <div style="max-height: 400px; overflow-y: auto; border-radius: 12px; border: 1px solid #e5e7eb;">
-                <table class="biomarker-table">
-                    <thead><tr><th>System</th><th>Marker</th><th>Value</th><th>Score</th></tr></thead>
-                    <tbody>{table_rows}</tbody>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
+            df = pd.DataFrame(all_markers)
+            st.dataframe(df, use_container_width=True, hide_index=True, height=400)
     
     st.markdown("---")
     
