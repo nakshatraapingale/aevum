@@ -105,6 +105,14 @@ h1, h2, h3 {
     margin-bottom: 1rem;
     border: 1px solid rgba(0, 0, 0, 0.04);
 }
+.tagline {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6366f1;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
 .card-title {
     font-size: 0.75rem;
     font-weight: 700;
@@ -1033,6 +1041,7 @@ def render_dashboard():
     
     with col1:
         st.markdown('<div class="card" style="text-align: center;">', unsafe_allow_html=True)
+        st.markdown('<div class="tagline">grow young</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-title">Health Score</div>', unsafe_allow_html=True)
         
         score = summary['overall_health_score']
