@@ -17,10 +17,12 @@ def calculate_gradient_score(value: float, config: Dict) -> float:
     Zone C (Critical): Score interpolates 40 -> 5
     Zone D (Failure): Score = 5
     """
-    opt = config['opt']
-    func_limit = config['func_limit']
-    crit_limit = config['crit_limit']
+    opt = config.get('opt', 50)
     direction = config.get('dir', 'low')
+    
+    # For split markers, func_limit may not exist - use defaults
+    func_limit = config.get('func_limit', opt)
+    crit_limit = config.get('crit_limit', opt)
     
     def lerp(v, start, end, score_start, score_end):
         if abs(end - start) == 0:
