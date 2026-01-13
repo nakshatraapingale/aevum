@@ -711,65 +711,185 @@ def score_all_systems(labs: Dict) -> List[Dict]:
 
 def calculate_biological_age(labs: Dict, chronological_age: int) -> Dict:
     """
-    Calculate biological age using PhenoAge-inspired algorithm.
-    Core markers: Albumin, Creatinine, Glucose, CRP, Lymphocyte%, MCV, RDW, ALP, WBC
+    Calculate biological age using PhenoAge algorithm.
+    Reference: Levine et al. 2018 - "An epigenetic biomarker of aging..."
+    https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1002718
+    
+    Required markers (9 biomarkers + age):
+    - Albumin (g/dL)
+    - Creatinine (mg/dL)  
+    - Glucose (mg/dL)
+    - C-reactive protein (mg/L)
+    - Lymphocyte percent (%)
+    - Mean cell volume (fL)
+    - Red cell distribution width (%)
+    - Alkaline phosphatase (U/L)
+    - White blood cell count (10^3 cells/μL)
     """
-    # Required markers with optimal values for reference
-    phenoage_markers = {
-        'Albumin': {'weight': 0.15, 'opt': 4.5, 'aging_dir': 'low_bad'},
-        'Creatinine': {'weight': 0.10, 'opt': 0.9, 'aging_dir': 'high_bad'},
-        'Glucose': {'weight': 0.15, 'opt': 85, 'aging_dir': 'high_bad'},
-        'hs_CRP': {'weight': 0.15, 'opt': 0.5, 'aging_dir': 'high_bad'},
-        'Lymphocytes': {'weight': 0.10, 'opt': 2.0, 'aging_dir': 'low_bad'},
-        'MCV': {'weight': 0.10, 'opt': 88, 'aging_dir': 'high_bad'},
-        'RDW': {'weight': 0.10, 'opt': 12.5, 'aging_dir': 'high_bad'},
-        'ALP': {'weight': 0.05, 'opt': 60, 'aging_dir': 'high_bad'},
-        'WBC': {'weight': 0.10, 'opt': 5.5, 'aging_dir': 'high_bad'},
+    
+    # PhenoAge coefficients from Levine 2018 (units: SI)
+    # We need to convert US units to SI for the formula
+    PHENOAGE_COEFFICIENTS = {
+        'intercept': -19.9067,
+        'age': 0.0804,
+        'albumin': -0.0336,      # g/L (US: g/dL * 10)
+        'creatinine': 0.0095,    # μmol/L (US: mg/dL * 88.4)
+        'glucose': 0.1953,       # mmol/L (US: mg/dL / 18.0)
+        'ln_crp': 0.0954,        # ln(mg/L)
+        'lymphocyte_pct': -0.0120,  # %
+        'mcv': 0.0268,           # fL
+        'rdw': 0.3306,           # %
+        'alp': 0.0019,           # U/L
+        'wbc': 0.0554,           # 10^3 cells/μL
     }
     
-    age_deltas = []
+    # Gompertz parameters
+    GAMMA = 0.0077
+    
+    # Track which markers we have
     markers_used = []
-    total_weight = 0
+    missing_markers = []
     
-    for marker_id, config in phenoage_markers.items():
-        if marker_id in labs:
-            value = labs[marker_id]
-            opt = config['opt']
-            weight = config['weight']
-            
-            # Calculate deviation from optimal
-            if config['aging_dir'] == 'high_bad':
-                deviation = (value - opt) / opt
-            else:  # low_bad
-                deviation = (opt - value) / opt
-            
-            # Convert to age delta (roughly 2 years per 10% deviation)
-            age_delta = deviation * 20 * weight
-            age_deltas.append(age_delta)
-            total_weight += weight
-            
-            markers_used.append({
-                'id': marker_id,
-                'value': value,
-                'contribution': round(age_delta, 1)
-            })
+    # Map our marker names to the values (with unit conversion)
+    marker_values = {}
     
-    if total_weight > 0:
-        # Normalize and calculate biological age
-        total_delta = sum(age_deltas) / total_weight
-        biological_age = chronological_age + total_delta
-        confidence = total_weight
+    # Albumin (g/dL -> g/L)
+    if 'Albumin' in labs:
+        marker_values['albumin'] = labs['Albumin'] * 10  # g/dL to g/L
+        markers_used.append({'id': 'Albumin', 'value': labs['Albumin'], 'unit': 'g/dL'})
     else:
-        biological_age = chronological_age
-        confidence = 0
-        total_delta = 0
+        missing_markers.append('Albumin')
+    
+    # Creatinine (mg/dL -> μmol/L)
+    if 'Creatinine' in labs:
+        marker_values['creatinine'] = labs['Creatinine'] * 88.4  # mg/dL to μmol/L
+        markers_used.append({'id': 'Creatinine', 'value': labs['Creatinine'], 'unit': 'mg/dL'})
+    else:
+        missing_markers.append('Creatinine')
+    
+    # Glucose (mg/dL -> mmol/L)
+    if 'Glucose' in labs:
+        marker_values['glucose'] = labs['Glucose'] / 18.0  # mg/dL to mmol/L
+        markers_used.append({'id': 'Glucose', 'value': labs['Glucose'], 'unit': 'mg/dL'})
+    else:
+        missing_markers.append('Glucose')
+    
+    # CRP (mg/L - same units, need ln)
+    if 'hs_CRP' in labs:
+        crp_val = max(labs['hs_CRP'], 0.1)  # Avoid ln(0)
+        marker_values['ln_crp'] = math.log(crp_val)
+        markers_used.append({'id': 'hs_CRP', 'value': labs['hs_CRP'], 'unit': 'mg/L'})
+    else:
+        missing_markers.append('hs_CRP')
+    
+    # Lymphocyte % 
+    lymph_key = None
+    for key in ['Lymphocytes_pct', 'Lymphocyte_pct', 'Lymphocytes']:
+        if key in labs:
+            lymph_key = key
+            break
+    if lymph_key:
+        marker_values['lymphocyte_pct'] = labs[lymph_key]
+        markers_used.append({'id': 'Lymphocyte%', 'value': labs[lymph_key], 'unit': '%'})
+    else:
+        missing_markers.append('Lymphocyte%')
+    
+    # MCV (fL - same units)
+    if 'MCV' in labs:
+        marker_values['mcv'] = labs['MCV']
+        markers_used.append({'id': 'MCV', 'value': labs['MCV'], 'unit': 'fL'})
+    else:
+        missing_markers.append('MCV')
+    
+    # RDW (% - same units)
+    if 'RDW' in labs:
+        marker_values['rdw'] = labs['RDW']
+        markers_used.append({'id': 'RDW', 'value': labs['RDW'], 'unit': '%'})
+    else:
+        missing_markers.append('RDW')
+    
+    # ALP (U/L - same units)
+    if 'ALP' in labs:
+        marker_values['alp'] = labs['ALP']
+        markers_used.append({'id': 'ALP', 'value': labs['ALP'], 'unit': 'U/L'})
+    else:
+        missing_markers.append('ALP')
+    
+    # WBC (10^3/μL - same units)
+    if 'WBC' in labs:
+        marker_values['wbc'] = labs['WBC']
+        markers_used.append({'id': 'WBC', 'value': labs['WBC'], 'unit': '10³/μL'})
+    else:
+        missing_markers.append('WBC')
+    
+    # Calculate confidence based on available markers
+    available_count = len(markers_used)
+    confidence = available_count / 9.0  # 9 required biomarkers
+    
+    # Need at least 5 markers for a meaningful calculation
+    if available_count < 5:
+        return {
+            'biological_age': float(chronological_age),
+            'chronological_age': chronological_age,
+            'age_delta': 0.0,
+            'confidence': round(confidence, 2),
+            'markers_used': markers_used,
+            'markers_missing': missing_markers,
+            'method': 'PhenoAge (insufficient data - using chronological age)'
+        }
+    
+    # Calculate xb (linear predictor)
+    # Start with intercept and age contribution
+    xb = PHENOAGE_COEFFICIENTS['intercept']
+    xb += PHENOAGE_COEFFICIENTS['age'] * chronological_age
+    
+    # Add available biomarker contributions
+    for marker, coef_name in [
+        ('albumin', 'albumin'),
+        ('creatinine', 'creatinine'),
+        ('glucose', 'glucose'),
+        ('ln_crp', 'ln_crp'),
+        ('lymphocyte_pct', 'lymphocyte_pct'),
+        ('mcv', 'mcv'),
+        ('rdw', 'rdw'),
+        ('alp', 'alp'),
+        ('wbc', 'wbc'),
+    ]:
+        if marker in marker_values:
+            xb += PHENOAGE_COEFFICIENTS[coef_name] * marker_values[marker]
+    
+    # Calculate mortality score using Gompertz hazard
+    # mort_score = 1 - exp(-exp(xb) * (exp(120*gamma) - 1) / gamma)
+    try:
+        hazard = math.exp(xb) * (math.exp(120 * GAMMA) - 1) / GAMMA
+        mort_score = 1 - math.exp(-hazard)
+        
+        # Clamp mort_score to avoid math errors
+        mort_score = max(0.0001, min(0.9999, mort_score))
+        
+        # Convert mortality score to PhenoAge
+        # PhenoAge = 141.50225 + ln(-0.00553 * ln(1 - mort_score)) / 0.090165
+        inner = -0.00553 * math.log(1 - mort_score)
+        if inner > 0:
+            phenoage = 141.50225 + math.log(inner) / 0.090165
+        else:
+            phenoage = float(chronological_age)
+    except (ValueError, OverflowError):
+        # Math error - fall back to chronological age
+        phenoage = float(chronological_age)
+    
+    # Sanity check - PhenoAge should be reasonable
+    phenoage = max(18, min(120, phenoage))
+    age_delta = phenoage - chronological_age
     
     return {
-        'biological_age': round(biological_age, 1),
+        'biological_age': round(phenoage, 1),
         'chronological_age': chronological_age,
-        'age_delta': round(total_delta, 1),
+        'age_delta': round(age_delta, 1),
         'confidence': round(confidence, 2),
-        'markers_used': markers_used
+        'markers_used': markers_used,
+        'markers_missing': missing_markers,
+        'method': 'PhenoAge (Levine 2018)'
     }
 
 
