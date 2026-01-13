@@ -728,13 +728,12 @@ def calculate_biological_age(labs: Dict, chronological_age: int) -> Dict:
     """
     
     # PhenoAge coefficients from Levine 2018 (units: SI)
-    # We need to convert US units to SI for the formula
     PHENOAGE_COEFFICIENTS = {
         'intercept': -19.9067,
         'age': 0.0804,
-        'albumin': -0.0336,      # g/L (US: g/dL * 10)
-        'creatinine': 0.0095,    # μmol/L (US: mg/dL * 88.4)
-        'glucose': 0.1953,       # mmol/L (US: mg/dL / 18.0)
+        'albumin': -0.0336,      # g/L
+        'creatinine': 0.0095,    # μmol/L
+        'glucose': 0.1953,       # mmol/L
         'ln_crp': 0.0954,        # ln(mg/L)
         'lymphocyte_pct': -0.0120,  # %
         'mcv': 0.0268,           # fL
@@ -743,91 +742,144 @@ def calculate_biological_age(labs: Dict, chronological_age: int) -> Dict:
         'wbc': 0.0554,           # 10^3 cells/μL
     }
     
+    # Population means (in SI units) for imputation when markers missing
+    # These are approximate healthy adult means
+    POPULATION_MEANS = {
+        'albumin': 43.0,        # g/L (4.3 g/dL)
+        'creatinine': 80.0,     # μmol/L (0.9 mg/dL)
+        'glucose': 5.0,         # mmol/L (90 mg/dL)
+        'ln_crp': -0.5,         # ln(0.6 mg/L)
+        'lymphocyte_pct': 28.0, # %
+        'mcv': 89.0,            # fL
+        'rdw': 13.0,            # %
+        'alp': 65.0,            # U/L
+        'wbc': 6.5,             # 10^3/μL
+    }
+    
     # Gompertz parameters
     GAMMA = 0.0077
     
-    # Track which markers we have
+    # Track markers
     markers_used = []
     missing_markers = []
-    
-    # Map our marker names to the values (with unit conversion)
     marker_values = {}
     
-    # Albumin (g/dL -> g/L)
+    # Helper to safely get value with bounds checking
+    def safe_value(val, min_v, max_v):
+        if val is None or math.isnan(val) or math.isinf(val):
+            return None
+        return max(min_v, min(max_v, val))
+    
+    # Albumin (g/dL -> g/L) - normal range 3.5-5.5 g/dL
     if 'Albumin' in labs:
-        marker_values['albumin'] = labs['Albumin'] * 10  # g/dL to g/L
-        markers_used.append({'id': 'Albumin', 'value': labs['Albumin'], 'unit': 'g/dL'})
+        val = safe_value(labs['Albumin'], 2.0, 6.0)
+        if val:
+            marker_values['albumin'] = val * 10
+            markers_used.append({'id': 'Albumin', 'value': val, 'unit': 'g/dL'})
+        else:
+            missing_markers.append('Albumin')
     else:
         missing_markers.append('Albumin')
     
-    # Creatinine (mg/dL -> μmol/L)
+    # Creatinine (mg/dL -> μmol/L) - normal range 0.5-1.5 mg/dL
     if 'Creatinine' in labs:
-        marker_values['creatinine'] = labs['Creatinine'] * 88.4  # mg/dL to μmol/L
-        markers_used.append({'id': 'Creatinine', 'value': labs['Creatinine'], 'unit': 'mg/dL'})
+        val = safe_value(labs['Creatinine'], 0.3, 3.0)
+        if val:
+            marker_values['creatinine'] = val * 88.4
+            markers_used.append({'id': 'Creatinine', 'value': val, 'unit': 'mg/dL'})
+        else:
+            missing_markers.append('Creatinine')
     else:
         missing_markers.append('Creatinine')
     
-    # Glucose (mg/dL -> mmol/L)
+    # Glucose (mg/dL -> mmol/L) - normal range 60-200 mg/dL
     if 'Glucose' in labs:
-        marker_values['glucose'] = labs['Glucose'] / 18.0  # mg/dL to mmol/L
-        markers_used.append({'id': 'Glucose', 'value': labs['Glucose'], 'unit': 'mg/dL'})
+        val = safe_value(labs['Glucose'], 40, 400)
+        if val:
+            marker_values['glucose'] = val / 18.0
+            markers_used.append({'id': 'Glucose', 'value': val, 'unit': 'mg/dL'})
+        else:
+            missing_markers.append('Glucose')
     else:
         missing_markers.append('Glucose')
     
-    # CRP (mg/L - same units, need ln)
+    # CRP (mg/L) - normal range 0.1-50 mg/L
     if 'hs_CRP' in labs:
-        crp_val = max(labs['hs_CRP'], 0.1)  # Avoid ln(0)
-        marker_values['ln_crp'] = math.log(crp_val)
-        markers_used.append({'id': 'hs_CRP', 'value': labs['hs_CRP'], 'unit': 'mg/L'})
+        val = safe_value(labs['hs_CRP'], 0.1, 100)
+        if val:
+            marker_values['ln_crp'] = math.log(max(val, 0.1))
+            markers_used.append({'id': 'hs_CRP', 'value': val, 'unit': 'mg/L'})
+        else:
+            missing_markers.append('hs_CRP')
     else:
         missing_markers.append('hs_CRP')
     
-    # Lymphocyte % 
+    # Lymphocyte % - normal range 15-45%
     lymph_key = None
     for key in ['Lymphocytes_pct', 'Lymphocyte_pct', 'Lymphocytes']:
         if key in labs:
             lymph_key = key
             break
     if lymph_key:
-        marker_values['lymphocyte_pct'] = labs[lymph_key]
-        markers_used.append({'id': 'Lymphocyte%', 'value': labs[lymph_key], 'unit': '%'})
+        val = safe_value(labs[lymph_key], 5, 60)
+        if val:
+            marker_values['lymphocyte_pct'] = val
+            markers_used.append({'id': 'Lymphocyte%', 'value': val, 'unit': '%'})
+        else:
+            missing_markers.append('Lymphocyte%')
     else:
         missing_markers.append('Lymphocyte%')
     
-    # MCV (fL - same units)
+    # MCV (fL) - normal range 70-110 fL
     if 'MCV' in labs:
-        marker_values['mcv'] = labs['MCV']
-        markers_used.append({'id': 'MCV', 'value': labs['MCV'], 'unit': 'fL'})
+        val = safe_value(labs['MCV'], 60, 120)
+        if val:
+            marker_values['mcv'] = val
+            markers_used.append({'id': 'MCV', 'value': val, 'unit': 'fL'})
+        else:
+            missing_markers.append('MCV')
     else:
         missing_markers.append('MCV')
     
-    # RDW (% - same units)
+    # RDW (%) - normal range 10-20%
     if 'RDW' in labs:
-        marker_values['rdw'] = labs['RDW']
-        markers_used.append({'id': 'RDW', 'value': labs['RDW'], 'unit': '%'})
+        val = safe_value(labs['RDW'], 8, 25)
+        if val:
+            marker_values['rdw'] = val
+            markers_used.append({'id': 'RDW', 'value': val, 'unit': '%'})
+        else:
+            missing_markers.append('RDW')
     else:
         missing_markers.append('RDW')
     
-    # ALP (U/L - same units)
+    # ALP (U/L) - normal range 30-150 U/L
     if 'ALP' in labs:
-        marker_values['alp'] = labs['ALP']
-        markers_used.append({'id': 'ALP', 'value': labs['ALP'], 'unit': 'U/L'})
+        val = safe_value(labs['ALP'], 20, 300)
+        if val:
+            marker_values['alp'] = val
+            markers_used.append({'id': 'ALP', 'value': val, 'unit': 'U/L'})
+        else:
+            missing_markers.append('ALP')
     else:
         missing_markers.append('ALP')
     
-    # WBC (10^3/μL - same units)
+    # WBC (10^3/μL) - normal range 3-15
     if 'WBC' in labs:
-        marker_values['wbc'] = labs['WBC']
-        markers_used.append({'id': 'WBC', 'value': labs['WBC'], 'unit': '10³/μL'})
+        val = safe_value(labs['WBC'], 2, 30)
+        if val:
+            marker_values['wbc'] = val
+            markers_used.append({'id': 'WBC', 'value': val, 'unit': '10³/μL'})
+        else:
+            missing_markers.append('WBC')
     else:
         missing_markers.append('WBC')
     
-    # Calculate confidence based on available markers
+    # Calculate confidence
     available_count = len(markers_used)
-    confidence = available_count / 9.0  # 9 required biomarkers
+    confidence = available_count / 9.0
     
-    # Need at least 5 markers for a meaningful calculation
-    if available_count < 5:
+    # Need at least 4 markers
+    if available_count < 4:
         return {
             'biological_age': float(chronological_age),
             'chronological_age': chronological_age,
@@ -835,51 +887,48 @@ def calculate_biological_age(labs: Dict, chronological_age: int) -> Dict:
             'confidence': round(confidence, 2),
             'markers_used': markers_used,
             'markers_missing': missing_markers,
-            'method': 'PhenoAge (insufficient data - using chronological age)'
+            'method': 'PhenoAge (insufficient data)'
         }
     
+    # Impute missing markers with population means
+    for marker_key in POPULATION_MEANS:
+        if marker_key not in marker_values:
+            marker_values[marker_key] = POPULATION_MEANS[marker_key]
+    
     # Calculate xb (linear predictor)
-    # Start with intercept and age contribution
     xb = PHENOAGE_COEFFICIENTS['intercept']
     xb += PHENOAGE_COEFFICIENTS['age'] * chronological_age
     
-    # Add available biomarker contributions
-    for marker, coef_name in [
-        ('albumin', 'albumin'),
-        ('creatinine', 'creatinine'),
-        ('glucose', 'glucose'),
-        ('ln_crp', 'ln_crp'),
-        ('lymphocyte_pct', 'lymphocyte_pct'),
-        ('mcv', 'mcv'),
-        ('rdw', 'rdw'),
-        ('alp', 'alp'),
-        ('wbc', 'wbc'),
-    ]:
-        if marker in marker_values:
-            xb += PHENOAGE_COEFFICIENTS[coef_name] * marker_values[marker]
+    for marker_key in ['albumin', 'creatinine', 'glucose', 'ln_crp', 
+                       'lymphocyte_pct', 'mcv', 'rdw', 'alp', 'wbc']:
+        xb += PHENOAGE_COEFFICIENTS[marker_key] * marker_values[marker_key]
     
-    # Calculate mortality score using Gompertz hazard
-    # mort_score = 1 - exp(-exp(xb) * (exp(120*gamma) - 1) / gamma)
+    # Calculate PhenoAge using Gompertz mortality model
     try:
-        hazard = math.exp(xb) * (math.exp(120 * GAMMA) - 1) / GAMMA
-        mort_score = 1 - math.exp(-hazard)
+        # Clamp xb to prevent overflow
+        xb = max(-50, min(50, xb))
         
-        # Clamp mort_score to avoid math errors
+        hazard = math.exp(xb) * (math.exp(120 * GAMMA) - 1) / GAMMA
+        hazard = max(1e-10, min(1e10, hazard))  # Prevent extreme values
+        
+        mort_score = 1 - math.exp(-hazard)
         mort_score = max(0.0001, min(0.9999, mort_score))
         
-        # Convert mortality score to PhenoAge
-        # PhenoAge = 141.50225 + ln(-0.00553 * ln(1 - mort_score)) / 0.090165
         inner = -0.00553 * math.log(1 - mort_score)
-        if inner > 0:
+        
+        if inner > 0 and inner < 1e10:
             phenoage = 141.50225 + math.log(inner) / 0.090165
         else:
             phenoage = float(chronological_age)
-    except (ValueError, OverflowError):
-        # Math error - fall back to chronological age
+            
+    except (ValueError, OverflowError, ZeroDivisionError):
         phenoage = float(chronological_age)
     
-    # Sanity check - PhenoAge should be reasonable
-    phenoage = max(18, min(120, phenoage))
+    # Final sanity check - MUST clamp to reasonable range
+    if math.isnan(phenoage) or math.isinf(phenoage):
+        phenoage = float(chronological_age)
+    phenoage = max(10, min(120, phenoage))
+    
     age_delta = phenoage - chronological_age
     
     return {
