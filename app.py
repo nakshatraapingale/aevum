@@ -141,8 +141,11 @@ h1, h2, h3 {
 .system-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     margin-bottom: 0.75rem;
+}
+.system-header .system-name {
+    margin-bottom: 0;
 }
 .system-icon {
     width: 40px;
@@ -805,15 +808,13 @@ def render_system_card(system):
     score = system['score']
     status = get_status_label(score)
     status_class = get_score_class(score)
-    icon_name = SYSTEM_ICONS.get(system['system_id'], 'brain')
-    icon_class = f"icon-{icon_name}"
     markers_count = len(system.get('markers_used', []))
     
     # Count alerts (markers with score < 60)
     alerts = sum(1 for m in system.get('markers_used', []) if m.get('score', 100) < 60)
     alert_html = f'<span class="alert-badge">{alerts} Alerts</span>' if alerts > 0 else ''
     
-    return f"""<div class="system-card"><div class="system-header"><div class="system-icon {icon_class}"></div>{alert_html}</div><div class="system-name">{system['name']}</div><div class="system-score-row"><span class="system-score score-{status_class}">{score:.0f}</span><span class="system-score-max">/100</span><span class="system-biomarker-count">{markers_count} Biomarkers</span></div><div class="system-progress"><div class="system-progress-bar bg-{status_class}" style="width: {score}%;"></div></div><div class="system-status status-{status_class}">{status}</div></div>"""
+    return f"""<div class="system-card"><div class="system-header"><div class="system-name">{system['name']}</div>{alert_html}</div><div class="system-score-row"><span class="system-score score-{status_class}">{score:.0f}</span><span class="system-score-max">/100</span><span class="system-biomarker-count">{markers_count} Biomarkers</span></div><div class="system-progress"><div class="system-progress-bar bg-{status_class}" style="width: {score}%;"></div></div><div class="system-status status-{status_class}">{status}</div></div>"""
 
 
 # =============================================================================
