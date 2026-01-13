@@ -21,12 +21,12 @@ from modules.data_extraction import pdf_to_dataframe, parse_whoop_csv, create_sa
 
 st.set_page_config(
     page_title="Aevum",
-    page_icon="🧬",
+    page_icon="◉",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Light theme with Nunito font
+# Light theme with Nunito font - NO EMOJIS
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
@@ -58,6 +58,9 @@ h1, h2, h3 {
     font-weight: 800;
     color: #1a1a2e;
     margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 .sub-title {
     font-size: 1rem;
@@ -66,7 +69,25 @@ h1, h2, h3 {
     font-weight: 500;
 }
 
-/* Cards - Light theme */
+/* Logo/Brand mark */
+.brand-mark {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.brand-mark::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 3px solid white;
+    border-radius: 50%;
+}
+
+/* Cards */
 .card {
     background: #ffffff;
     border-radius: 20px;
@@ -76,12 +97,12 @@ h1, h2, h3 {
     border: 1px solid rgba(0, 0, 0, 0.04);
 }
 .card-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #9ca3af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 .card-value {
     font-size: 2.5rem;
@@ -89,7 +110,7 @@ h1, h2, h3 {
     color: #1a1a2e;
 }
 .card-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #9ca3af;
     margin-top: 0.25rem;
 }
@@ -115,80 +136,162 @@ h1, h2, h3 {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 .system-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
     margin-bottom: 0.75rem;
+    position: relative;
+}
+.system-icon::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
 }
 .system-name {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #1a1a2e;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 .system-score {
     font-size: 1.75rem;
     font-weight: 800;
+    line-height: 1;
 }
 .system-status {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
 }
 
-/* Status badge colors */
+/* Status badges */
 .status-optimal { 
-    color: #22c55e; 
+    color: #166534; 
     background: #dcfce7;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
     display: inline-block;
 }
 .status-good { 
-    color: #65a30d; 
+    color: #3f6212; 
     background: #ecfccb;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
     display: inline-block;
 }
 .status-fair { 
-    color: #d97706; 
+    color: #92400e; 
     background: #fef3c7;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
     display: inline-block;
 }
 .status-risk { 
-    color: #dc2626; 
+    color: #991b1b; 
     background: #fee2e2;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
     display: inline-block;
 }
 
-/* Icon backgrounds */
-.icon-heart { background: linear-gradient(135deg, #fee2e2, #fecaca); }
-.icon-metabolic { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-.icon-immune { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
-.icon-blood { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
-.icon-brain { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); }
-.icon-liver { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-.icon-kidney { background: linear-gradient(135deg, #ccfbf1, #99f6e4); }
-.icon-hormone { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+/* System icon styles with shapes */
+.icon-heart { 
+    background: linear-gradient(135deg, #fecaca, #fca5a5); 
+}
+.icon-heart::after {
+    width: 14px;
+    height: 14px;
+    background: #ef4444;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+}
+.icon-metabolic { 
+    background: linear-gradient(135deg, #fed7aa, #fdba74); 
+}
+.icon-metabolic::after {
+    width: 12px;
+    height: 12px;
+    background: #f97316;
+    border-radius: 2px;
+    transform: rotate(45deg);
+}
+.icon-immune { 
+    background: linear-gradient(135deg, #bbf7d0, #86efac); 
+}
+.icon-immune::after {
+    width: 14px;
+    height: 14px;
+    border: 3px solid #22c55e;
+    background: transparent;
+}
+.icon-blood { 
+    background: linear-gradient(135deg, #fecdd3, #fda4af); 
+}
+.icon-blood::after {
+    width: 10px;
+    height: 10px;
+    background: #e11d48;
+    border-radius: 50%;
+}
+.icon-brain { 
+    background: linear-gradient(135deg, #c7d2fe, #a5b4fc); 
+}
+.icon-brain::after {
+    width: 14px;
+    height: 14px;
+    border: 3px solid #6366f1;
+    border-radius: 50%;
+    background: transparent;
+}
+.icon-liver { 
+    background: linear-gradient(135deg, #fde68a, #fcd34d); 
+}
+.icon-liver::after {
+    width: 12px;
+    height: 12px;
+    background: #eab308;
+    border-radius: 3px;
+}
+.icon-kidney { 
+    background: linear-gradient(135deg, #a5f3fc, #67e8f9); 
+}
+.icon-kidney::after {
+    width: 10px;
+    height: 10px;
+    background: #06b6d4;
+    border-radius: 50%;
+}
+.icon-hormone { 
+    background: linear-gradient(135deg, #e9d5ff, #d8b4fe); 
+}
+.icon-hormone::after {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 12px solid #a855f7;
+    background: transparent;
+    border-radius: 0;
+}
 
 /* Section headers */
 .section-header {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #1a1a2e;
     margin: 2rem 0 1rem 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+.section-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
 }
 
 /* Insights */
@@ -198,9 +301,12 @@ h1, h2, h3 {
     padding: 1rem 1.25rem;
     margin-bottom: 0.75rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border-left: 4px solid #3b82f6;
+    border-left: 4px solid #6366f1;
     font-size: 0.9rem;
     color: #374151;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
 }
 .insight-card.warning {
     border-left-color: #f59e0b;
@@ -210,6 +316,16 @@ h1, h2, h3 {
     border-left-color: #22c55e;
     background: #f0fdf4;
 }
+.insight-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.insight-icon.info { background: #dbeafe; border: 2px solid #3b82f6; }
+.insight-icon.warning { background: #fef3c7; border: 2px solid #f59e0b; }
+.insight-icon.success { background: #dcfce7; border: 2px solid #22c55e; }
 
 /* Buttons */
 .stButton > button {
@@ -254,9 +370,6 @@ h1, h2, h3 {
     border-radius: 12px !important;
     font-family: 'Nunito', sans-serif !important;
 }
-.stNumberInput input:focus {
-    border-color: #6366f1 !important;
-}
 
 /* Tabs */
 .stTabs [data-baseweb="tab-list"] {
@@ -279,20 +392,6 @@ h1, h2, h3 {
     color: #ffffff;
 }
 
-/* Expander */
-.streamlit-expanderHeader {
-    background: #ffffff !important;
-    border-radius: 12px !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-weight: 600 !important;
-}
-
-/* Data table */
-.stDataFrame {
-    background: #ffffff;
-    border-radius: 12px;
-}
-
 /* Messages */
 .upload-success {
     background: #f0fdf4;
@@ -301,6 +400,17 @@ h1, h2, h3 {
     padding: 1rem 1.25rem;
     color: #166534;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.upload-success::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    background: #22c55e;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 .upload-error {
     background: #fef2f2;
@@ -320,28 +430,29 @@ h1, h2, h3 {
 
 /* Bio age display */
 .bio-age-card {
-    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    background: #ffffff;
     border-radius: 20px;
     padding: 1.5rem;
     text-align: center;
-    border: 1px solid #86efac;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 2px solid #dcfce7;
 }
 .bio-age-value {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 800;
     color: #166534;
+    line-height: 1;
 }
 .bio-age-label {
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
     color: #22c55e;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
 }
-
 .bio-age-card.older {
-    background: linear-gradient(135deg, #fef2f2, #fee2e2);
-    border-color: #fca5a5;
+    border-color: #fecaca;
 }
 .bio-age-card.older .bio-age-value {
     color: #991b1b;
@@ -355,10 +466,10 @@ h1, h2, h3 {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 .pace-slow {
     background: #dcfce7;
@@ -373,14 +484,46 @@ h1, h2, h3 {
     color: #991b1b;
 }
 
+/* Pace visual indicator */
+.pace-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0.5rem 0;
+}
+.pace-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e5e7eb;
+}
+.pace-dot.active { background: #6366f1; }
+.pace-dot.slow { background: #22c55e; }
+.pace-dot.fast { background: #ef4444; }
+
 /* Welcome page */
 .welcome-hero {
     text-align: center;
     padding: 3rem 0;
 }
-.welcome-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+.welcome-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 24px;
+    margin: 0 auto 1.5rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+}
+.welcome-logo::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 4px solid white;
+    border-radius: 50%;
 }
 .welcome-title {
     font-size: 2.5rem;
@@ -396,7 +539,7 @@ h1, h2, h3 {
     line-height: 1.6;
 }
 
-/* Feature cards on welcome */
+/* Feature cards */
 .feature-card {
     background: #ffffff;
     border-radius: 20px;
@@ -407,8 +550,50 @@ h1, h2, h3 {
     height: 100%;
 }
 .feature-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.feature-icon.systems {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+.feature-icon.systems::after {
+    content: '';
+    display: grid;
+    grid-template-columns: repeat(2, 8px);
+    grid-template-rows: repeat(2, 8px);
+    gap: 4px;
+}
+.feature-icon.systems::before,
+.feature-icon.systems::after {
+    content: '';
+    position: absolute;
+}
+.feature-icon.age {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+}
+.feature-icon.age::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    border: 3px solid #22c55e;
+    border-radius: 50%;
+}
+.feature-icon.pace {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+}
+.feature-icon.pace::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 12px solid #f59e0b;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
 }
 .feature-title {
     font-size: 1rem;
@@ -419,6 +604,42 @@ h1, h2, h3 {
 .feature-desc {
     font-size: 0.85rem;
     color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Delta indicator */
+.delta-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-top: 1rem;
+}
+.delta-value {
+    font-size: 1rem;
+    font-weight: 700;
+}
+.delta-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+}
+.delta-positive { color: #22c55e; }
+.delta-negative { color: #ef4444; }
+.delta-neutral { color: #6b7280; }
+
+/* Grid dots for systems icon */
+.grid-dots {
+    display: grid;
+    grid-template-columns: repeat(2, 6px);
+    gap: 3px;
+}
+.grid-dots span {
+    width: 6px;
+    height: 6px;
+    background: #3b82f6;
+    border-radius: 2px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -454,31 +675,30 @@ def get_score_class(score):
     if score >= 40: return 'fair'
     return 'risk'
 
-def get_system_icon(system_id):
+def get_system_icon_class(system_id):
     icons = {
-        'cardiovascular': ('❤️', 'icon-heart'),
-        'metabolic': ('🔥', 'icon-metabolic'),
-        'immune': ('🛡️', 'icon-immune'),
-        'blood': ('🩸', 'icon-blood'),
-        'brain': ('🧠', 'icon-brain'),
-        'liver': ('🫀', 'icon-liver'),
-        'kidney': ('💧', 'icon-kidney'),
-        'hormonal': ('⚡', 'icon-hormone'),
+        'cardiovascular': 'icon-heart',
+        'metabolic': 'icon-metabolic',
+        'immune': 'icon-immune',
+        'blood': 'icon-blood',
+        'brain': 'icon-brain',
+        'liver': 'icon-liver',
+        'kidney': 'icon-kidney',
+        'hormonal': 'icon-hormone',
     }
-    return icons.get(system_id, ('📊', 'icon-metabolic'))
+    return icons.get(system_id, 'icon-metabolic')
 
 def create_score_gauge(score, size=200):
     """Create a circular gauge chart with gradient."""
     color = get_score_color(score)
     
-    # Create the gauge
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=score,
-        number={'font': {'size': 48, 'color': '#1a1a2e', 'family': 'Nunito'}, 'suffix': ''},
+        number={'font': {'size': 52, 'color': '#1a1a2e', 'family': 'Nunito'}, 'suffix': ''},
         gauge={
             'axis': {'range': [0, 100], 'tickwidth': 0, 'tickcolor': 'rgba(0,0,0,0)', 'visible': False},
-            'bar': {'color': color, 'thickness': 0.3},
+            'bar': {'color': color, 'thickness': 0.25},
             'bgcolor': '#f3f4f6',
             'borderwidth': 0,
             'steps': [
@@ -507,7 +727,7 @@ def render_welcome():
     """Welcome/onboarding page."""
     st.markdown("""
     <div class="welcome-hero">
-        <div class="welcome-icon">🧬</div>
+        <div class="welcome-logo"></div>
         <div class="welcome-title">aevum</div>
         <div class="welcome-subtitle">
             Your personal longevity companion. Upload your blood work and discover your biological age, health scores, and personalized insights.
@@ -515,13 +735,16 @@ def render_welcome():
     </div>
     """, unsafe_allow_html=True)
     
-    # Feature cards
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon">📊</div>
+            <div class="feature-icon systems">
+                <div class="grid-dots">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+            </div>
             <div class="feature-title">8 Health Systems</div>
             <div class="feature-desc">Comprehensive analysis of cardiovascular, metabolic, immune, and more</div>
         </div>
@@ -530,7 +753,7 @@ def render_welcome():
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon">🎯</div>
+            <div class="feature-icon age"></div>
             <div class="feature-title">Biological Age</div>
             <div class="feature-desc">PhenoAge algorithm calculates your true biological age</div>
         </div>
@@ -539,7 +762,7 @@ def render_welcome():
     with col3:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon">⚡</div>
+            <div class="feature-icon pace"></div>
             <div class="feature-title">Pace of Aging</div>
             <div class="feature-desc">Are you aging faster or slower than average?</div>
         </div>
@@ -549,22 +772,26 @@ def render_welcome():
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("Get Started →", use_container_width=True):
+        if st.button("Get Started", use_container_width=True):
             st.session_state.page = 'upload'
             st.rerun()
 
 
 def render_upload():
     """Data upload page."""
-    st.markdown('<div class="main-title">📋 Upload Your Data</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="main-title">
+        <div class="brand-mark"></div>
+        Upload Your Data
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown('<div class="sub-title">We support PDF and CSV blood test results</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1], gap="large")
     
     with col1:
-        st.markdown('<div class="section-header">👤 Your Information</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"><span class="section-dot"></span> Your Information</div>', unsafe_allow_html=True)
         
-        # Age slider
         st.markdown("**Age**")
         st.session_state.age = st.slider(
             "Your age",
@@ -577,8 +804,7 @@ def render_upload():
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # File upload
-        st.markdown('<div class="section-header">📄 Blood Test Results</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"><span class="section-dot"></span> Blood Test Results</div>', unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader(
             "Upload blood test",
@@ -607,32 +833,32 @@ def render_upload():
                     if st.session_state.labs:
                         st.markdown(f"""
                         <div class="upload-success">
-                            ✓ Loaded <strong>{len(st.session_state.labs)}</strong> biomarkers from {uploaded_file.name}
+                            Loaded <strong>{len(st.session_state.labs)}</strong> biomarkers from {uploaded_file.name}
                         </div>
                         """, unsafe_allow_html=True)
                     else:
                         st.markdown("""
                         <div class="upload-error">
-                            ⚠️ No biomarkers found. Try manual entry.
+                            No biomarkers found. Try manual entry.
                         </div>
                         """, unsafe_allow_html=True)
                         
             except Exception as e:
                 st.markdown(f"""
                 <div class="upload-error">
-                    ⚠️ Error: {str(e)[:100]}
+                    Error: {str(e)[:100]}
                 </div>
                 """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🧪 Use Sample Data"):
+        if st.button("Use Sample Data"):
             sample_df = create_sample_blood_data()
             labs_row = sample_df.iloc[-1].drop('date').to_dict()
             st.session_state.labs = {k: v for k, v in labs_row.items() if v is not None}
             st.rerun()
     
     with col2:
-        st.markdown('<div class="section-header">✏️ Manual Entry</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"><span class="section-dot"></span> Manual Entry</div>', unsafe_allow_html=True)
         
         with st.expander("Enter biomarkers manually", expanded=not bool(st.session_state.labs)):
             c1, c2 = st.columns(2)
@@ -669,7 +895,7 @@ def render_upload():
                 if albumin > 0: st.session_state.labs['Albumin'] = albumin
         
         if st.session_state.labs:
-            st.markdown('<div class="section-header">📊 Loaded Biomarkers</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-header"><span class="section-dot"></span> Loaded Biomarkers</div>', unsafe_allow_html=True)
             st.markdown(f"""
             <div class="upload-info">
                 {len(st.session_state.labs)} biomarkers ready for analysis
@@ -686,12 +912,12 @@ def render_upload():
     
     c1, c2, c3 = st.columns([1, 1, 1])
     with c1:
-        if st.button("← Back"):
+        if st.button("Back"):
             st.session_state.page = 'welcome'
             st.rerun()
     with c3:
         can_analyze = len(st.session_state.labs) > 0
-        if st.button("Analyze →", disabled=not can_analyze, use_container_width=True):
+        if st.button("Analyze", disabled=not can_analyze, use_container_width=True):
             st.session_state.results = run_titan_engine(
                 st.session_state.labs,
                 st.session_state.age
@@ -711,11 +937,15 @@ def render_dashboard():
     summary = results['summary']
     systems = results['systems']
     
-    # Header
-    st.markdown('<div class="main-title">🧬 Your Health Report</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="main-title">
+        <div class="brand-mark"></div>
+        Your Health Report
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown('<div class="sub-title">Powered by Titan Protocol & PhenoAge Algorithm</div>', unsafe_allow_html=True)
     
-    # Top row - Score + Bio Age + Pace
+    # Top row
     col1, col2, col3 = st.columns([1.2, 1, 1])
     
     with col1:
@@ -727,7 +957,7 @@ def render_dashboard():
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
         
         score_class = get_score_class(score)
-        st.markdown(f'<div class="status-{score_class}" style="margin-top: -20px;">{score_class.title()}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="status-{score_class}" style="margin-top: -15px;">{score_class.title()}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
@@ -740,43 +970,58 @@ def render_dashboard():
         <div class="bio-age-card {card_class}">
             <div class="bio-age-label">Biological Age</div>
             <div class="bio-age-value">{bio_age:.0f}</div>
-            <div class="card-subtitle" style="color: #6b7280;">Actual: {chrono_age} years</div>
+            <div class="card-subtitle">Actual: {chrono_age} years</div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Age delta
-        delta_text = f"{abs(age_delta):.1f} years younger" if age_delta < 0 else f"{age_delta:.1f} years older" if age_delta > 0 else "On track"
-        delta_color = "#22c55e" if age_delta < 0 else "#ef4444" if age_delta > 2 else "#6b7280"
+        # Delta
+        if age_delta < -1:
+            delta_class = "delta-positive"
+            delta_text = f"{abs(age_delta):.1f} years younger"
+        elif age_delta > 1:
+            delta_class = "delta-negative"
+            delta_text = f"{age_delta:.1f} years older"
+        else:
+            delta_class = "delta-neutral"
+            delta_text = "On track"
         
         st.markdown(f"""
-        <div class="card" style="text-align: center; margin-top: 1rem;">
-            <div style="font-size: 1.1rem; font-weight: 700; color: {delta_color};">{delta_text}</div>
-            <div style="font-size: 0.8rem; color: #9ca3af;">vs actual age</div>
+        <div class="delta-card">
+            <div class="delta-value {delta_class}">{delta_text}</div>
+            <div class="delta-label">vs actual age</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         pace = summary['pace_of_aging']
-        pace_class = "pace-slow" if pace < 0.95 else "pace-fast" if pace > 1.05 else "pace-normal"
-        pace_icon = "🐢" if pace < 0.95 else "🐇" if pace > 1.05 else "⚖️"
-        pace_text = "Slower" if pace < 0.95 else "Faster" if pace > 1.05 else "Average"
+        if pace < 0.95:
+            pace_class = "pace-slow"
+            pace_text = "Slower"
+        elif pace > 1.05:
+            pace_class = "pace-fast"
+            pace_text = "Faster"
+        else:
+            pace_class = "pace-normal"
+            pace_text = "Average"
         
         st.markdown(f"""
         <div class="card" style="text-align: center;">
             <div class="card-title">Pace of Aging</div>
-            <div style="font-size: 3rem; margin: 0.5rem 0;">{pace_icon}</div>
-            <div style="font-size: 2rem; font-weight: 800; color: #1a1a2e;">{pace:.2f}x</div>
-            <div class="pace-badge {pace_class}" style="margin-top: 0.75rem;">{pace_text} than average</div>
+            <div class="pace-visual">
+                <div class="pace-dot {'slow' if pace < 0.95 else ''}"></div>
+                <div class="pace-dot {'active' if 0.95 <= pace <= 1.05 else ''}"></div>
+                <div class="pace-dot {'fast' if pace > 1.05 else ''}"></div>
+            </div>
+            <div style="font-size: 2.5rem; font-weight: 800; color: #1a1a2e; margin: 0.5rem 0;">{pace:.2f}x</div>
+            <div class="pace-badge {pace_class}">{pace_text} than average</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Body Systems Section
-    st.markdown('<div class="section-header">🫀 Your Body Systems</div>', unsafe_allow_html=True)
+    # Systems
+    st.markdown('<div class="section-header"><span class="section-dot"></span> Your Body Systems</div>', unsafe_allow_html=True)
     
-    # Sort by score (lowest first to highlight areas needing attention)
     sorted_systems = sorted(systems, key=lambda x: x['score'])
     
-    # Display in 2 rows of 4
     for row_start in range(0, len(sorted_systems), 4):
         cols = st.columns(4)
         for i, col in enumerate(cols):
@@ -786,12 +1031,12 @@ def render_dashboard():
                 score = system['score']
                 score_class = get_score_class(score)
                 color = get_score_color(score)
-                icon, icon_class = get_system_icon(system['system_id'])
+                icon_class = get_system_icon_class(system['system_id'])
                 
                 with col:
                     st.markdown(f"""
                     <div class="system-card">
-                        <div class="system-icon {icon_class}">{icon}</div>
+                        <div class="system-icon {icon_class}"></div>
                         <div class="system-name">{system['name']}</div>
                         <div class="system-score" style="color: {color};">{score:.0f}</div>
                         <div class="system-status">
@@ -800,26 +1045,34 @@ def render_dashboard():
                     </div>
                     """, unsafe_allow_html=True)
     
-    # Insights Section
-    st.markdown('<div class="section-header">💡 Key Insights</div>', unsafe_allow_html=True)
+    # Insights
+    st.markdown('<div class="section-header"><span class="section-dot"></span> Key Insights</div>', unsafe_allow_html=True)
     
     insights = results.get('insights', [])
     
     col1, col2 = st.columns(2)
     for idx, insight in enumerate(insights[:6]):
-        card_class = "warning" if "Attention" in insight or "Priority" in insight else "success" if "Excellent" in insight or "Strong" in insight else ""
-        icon = "⚠️" if "warning" in card_class else "✓" if "success" in card_class else "💡"
+        if "Attention" in insight or "Priority" in insight:
+            card_class = "warning"
+            icon_class = "warning"
+        elif "Excellent" in insight or "Strong" in insight:
+            card_class = "success"
+            icon_class = "success"
+        else:
+            card_class = ""
+            icon_class = "info"
         
         target_col = col1 if idx % 2 == 0 else col2
         with target_col:
             st.markdown(f"""
             <div class="insight-card {card_class}">
-                {icon} {insight}
+                <div class="insight-icon {icon_class}"></div>
+                <div>{insight}</div>
             </div>
             """, unsafe_allow_html=True)
     
-    # Biomarkers Section
-    with st.expander("📋 View All Biomarkers"):
+    # Biomarkers
+    with st.expander("View All Biomarkers"):
         all_markers = []
         for system in systems:
             for marker in system.get('markers_used', []):
@@ -838,7 +1091,7 @@ def render_dashboard():
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
-        if st.button("← New Analysis"):
+        if st.button("New Analysis"):
             st.session_state.page = 'upload'
             st.session_state.labs = {}
             st.session_state.results = None
