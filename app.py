@@ -804,17 +804,13 @@ def create_score_gauge(score, size=200):
 
 
 def render_system_card(system):
-    """Render a system card matching the reference design."""
+    """Render a system card - clean minimal design."""
     score = system['score']
     status = get_status_label(score)
     status_class = get_score_class(score)
     markers_count = len(system.get('markers_used', []))
     
-    # Count alerts (markers with score < 60)
-    alerts = sum(1 for m in system.get('markers_used', []) if m.get('score', 100) < 60)
-    alert_html = f'<span class="alert-badge">{alerts} Alerts</span>' if alerts > 0 else ''
-    
-    return f"""<div class="system-card"><div class="system-header"><div class="system-name">{system['name']}</div>{alert_html}</div><div class="system-score-row"><span class="system-score score-{status_class}">{score:.0f}</span><span class="system-score-max">/100</span><span class="system-biomarker-count">{markers_count} Biomarkers</span></div><div class="system-progress"><div class="system-progress-bar bg-{status_class}" style="width: {score}%;"></div></div><div class="system-status status-{status_class}">{status}</div></div>"""
+    return f"""<div class="system-card"><div class="system-name">{system['name']}</div><div class="system-score-row"><span class="system-score score-{status_class}">{score:.0f}</span><span class="system-score-max">/100</span><span class="system-biomarker-count">{markers_count} Biomarkers</span></div><div class="system-progress"><div class="system-progress-bar bg-{status_class}" style="width: {score}%;"></div></div><div class="system-status status-{status_class}">{status}</div></div>"""
 
 
 # =============================================================================
